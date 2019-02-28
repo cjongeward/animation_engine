@@ -2,7 +2,7 @@
 ray tracer and animation engine
 
 Prototypes:
-* [Basic Ray Tracer](#basic_ray_tracer)
+* [Basic Ray Tracer](1-Basic_Ray_Tracer/README.md)
 * [Spheres with diffues shading]
 * [Spheres with specular shading]
 * [Spheres with Reflection]
@@ -17,6 +17,4 @@ Prototypes:
 * [making a video]
 * [animnating with a predefined path]
 * [animating with a physics engine]
-
-### basic_ray_tracer
-hi
+* [running in real time]
