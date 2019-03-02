@@ -10,6 +10,9 @@
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Shapes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ArrToBmp.h">
@@ -22,6 +25,9 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Shapes.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Reflection.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,8 +1,10 @@
 #ifndef SHAPES_H_
 #define SHAPES_H_
 
+#include <optional>
 #include "vec.h"
 #include "Color.h"
+#include "Reflection.h"
 
 struct Ray {
   vec pos;
@@ -14,6 +16,7 @@ struct Sphere {
   vec pos;
   Color color;
   float radius;
+  bool bIsLightSource = false;
   Sphere(const vec& t_pos, const Color& t_color, float t_radius) : pos{ t_pos }, color{ t_color }, radius{ t_radius } {}
 };
 
@@ -25,6 +28,13 @@ struct Screen {
 };
 
 
+struct ReflectionData {
+  Ray reflection;
+  vec norm;
+  ReflectionData(const Ray& t_reflection, const vec& t_norm) : reflection{ t_reflection }, norm{ t_norm }{}
+};
+
+std::optional<ReflectionData> intersects(Sphere s, Ray incident);
 
 
 #endif

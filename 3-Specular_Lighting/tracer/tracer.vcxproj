@@ -119,10 +119,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Shapes.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ArrToBmp.h" />
     <ClInclude Include="Color.h" />
+    <ClInclude Include="Reflection.h" />
     <ClInclude Include="Shapes.h" />
     <ClInclude Include="vec.h" />
   </ItemGroup>
