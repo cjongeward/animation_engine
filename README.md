@@ -3,8 +3,8 @@ ray tracer and animation engine
 
 Prototypes:
 * [Basic Ray Tracer](1-Basic_Ray_Tracer/README.md)
-* [Spheres with diffues shading]
-* [Spheres with specular shading]
+* [Spheres with diffues shading](2-Diffuse_Lighting/README.md)
+* [Spheres with specular shading](3-Specular_Lighting/README.md)
 * [Spheres with Reflection]
 * [Shapes - Planes, Rectangles, Boxes, Sticks]
 * [Perspective viewing]
