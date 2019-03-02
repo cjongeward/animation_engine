@@ -109,5 +109,5 @@ int main() {
 
 	delete[] img;
 
-  system("start  C:\\WINDOWS\\system32\\mspaint.exe C:\\Users\\caj34\\Documents\\repos\\animation_engine\\tracer\\foo.bmp");
+  system("start  C:\\WINDOWS\\system32\\mspaint.exe C:\\Users\\caj34\\Documents\\repos\\animation_engine\\current\\tracer\\foo.bmp");
 }
