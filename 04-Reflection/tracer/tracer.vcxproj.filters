@@ -13,6 +13,9 @@
     <ClCompile Include="Shapes.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="RayTracer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ArrToBmp.h">
@@ -28,6 +31,12 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Reflection.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RayTracer.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Settings.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

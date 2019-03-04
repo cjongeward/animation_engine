@@ -86,6 +86,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpplatest</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\resources\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -119,12 +120,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="RayTracer.cpp" />
     <ClCompile Include="Shapes.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ArrToBmp.h" />
     <ClInclude Include="Color.h" />
+    <ClInclude Include="RayTracer.h" />
     <ClInclude Include="Reflection.h" />
+    <ClInclude Include="Settings.h" />
     <ClInclude Include="Shapes.h" />
     <ClInclude Include="vec.h" />
   </ItemGroup>
