@@ -1,5 +1,14 @@
 # 2 Diffuse lighting
 
+
+
+## Description:
+The last exercise gave me a bright red circle. I know that it’s really a red sphere floating 4 units away from the camera, but everyone else just thinks it’s a red circle. I need to add some lighting to the scene and shading to the sphere so that it actually looks like a sphere.
+
+I will apply three different types of lighting over the next two projects, ambient lighting, diffuse lighting, and specular lighting. 
+* ambient lighting is used to illuminate a surface that is not exposed to any direct lighting. In the real world, light repeatedly bounces off surfaces and molecules in the atmosphere and whatnot to indirectly illuminate surfaces. I will approximate that lighting by simply illuminating every surface in the scene with a low level of light. There are techniques to make ambient lighting more realistic and I’ll expand on this later. 
+* Diffuse shading and specular shading both describe how light reflects from a surface, but they represent opposite ends of the shininess spectrum.  So any light reflecting from a surface lies somewhere between fully diffuse and fully specular. Fully diffuse reflection means the light is reflected evenly in every direction in the hemisphere of the incident light. This creates a color that appears flat and chalky. Fully specular reflection means that the light source will reflect off the surface in one direction. This would create the appearance of a mirror. I’ll implement fully diffuse reflection in this project and then add a specular component in the next project. 
+
 ## Goals:
 * apply ambient lighting to the entire sphere. 
 * light the sphere from the side and apply a diffuse shading equation.
@@ -7,16 +16,73 @@
 ## Result:
 ![](/2-Diffuse_Lighting/tracer/image.bmp)
 
-## Description:
-The last exercise gave me a bright red circle. I know that it’s really a red sphere floating 4 units away from the camera, but to everyone else it’s a red circle. I need to add some lighting to the scene and shade the sphere so that it actually looks like a sphere.
-
-I will apply three different types of lighting over the next two projects, ambient lighting, diffuse lighting, and specular lighting. 
-* ambient lighting is used to illuminate a surface that is not exposed to any direct lighting. In the real world, light repeatedly bounces off surfaces and molecules in the atmosphere to indirectly illuminate surfaces. I will approximate that lighting by simply illuminating every surface in the scene with a low level of light. There are techniques to make ambient lighting more realistic and I’ll expand on this in a later exercise. 
-* Diffuse lighting and specular lighting describe how light reflects from a surface at opposite ends of a spectrum.  So any light reflecting from a surface lies somewhere between fully diffuse and fully specular. Fully diffuse reflection means the light is reflected evenly in every direction in the hemisphere of the incident light. This creates a color that appears flat. Fully specular reflection means that the light will reflect in one direction. This would create the appearance of a mirror. I’ll implement fully diffuse reflection in this exercise and then add a specular component in the next exercise. 
-
 ## Implementation:
-* move my vector class into its own file. I should probably consider using an existing vector implementation, but for now I’ll keep using my own until it gets too annoying and tedious. Add all the required operators plus the basic vector operations like cross product, normalize, etc. 
-* make a Color class that is backed by a vec3. Add a method to clamp the values between 0 and 1. For now I will just limit the color values with min and max. This creates a weird looking shading when the color becomes saturated (greater than one).  There are other methods for clamping that make the image look more realistic. I will apply them in a future exercise. 
-* Move the sphere into a container so I can iterate through multiple spheres. The sphere will become a polymorphic shape object eventually. 
-* Apply ambient and diffuse shading to the sphere. Hard code a light source. 
+* Move the vector class into its own file. I should probably consider using an existing vector implementation like GLM, but for now I’ll keep using my own until it gets too annoying and tedious. I added all the required operators plus the basic vector operations like cross product, normalize, etc. 
+* Make a Color class. In the previous project, I represented color with a plane unsigned int. Now I will make a color class the uses the 3D vector to store RGB data. Each value should stay between 0 and 1 so I need to add a method to clamp the values outside that range. For now I will just limit the color values with min and max. This creates a weird looking shading when the color becomes saturated (greater than one).  There are other methods for clamping that make the image look more realistic. I will apply them in a future project. I also supply an implicit conversion operator to convert the color to an unsigned int. This comes in handy when we assign the color to the image buffer. 
+```cpp
+class Color {
+  vec color_vec;
 
+public:
+  Color(float red, float green, float blue) : color_vec{ red, green, blue } {}
+  void clamp() {
+    color_vec.x = std::min(1.f, std::max(0.f, color_vec.x));
+    color_vec.y = std::min(1.f, std::max(0.f, color_vec.y));
+    color_vec.z = std::min(1.f, std::max(0.f, color_vec.z));
+  }
+  operator unsigned() const {
+    Color temp_color = *this;
+    temp_color.clamp();
+    return (static_cast<unsigned>(255. * temp_color.color_vec.z) << 8) + 
+      (static_cast<unsigned>(255. * temp_color.color_vec.y) << 16) + 
+      (static_cast<unsigned>(255. * temp_color.color_vec.x) << 24);
+  }
+}
+```
+* Move the sphere into a container.  I will eventually want to render more than one shape so I will need a poloymorphic shape type and a container to hold them. For now, I will move the sphere into a std::vector and change the tracer code to iterate the std::vector. 
+* Apply ambient lighting. To do this, I set a global const float to the ambient light intensity.  The entire surface of the sphere will be rendered as it’s color (red) multiplied by the ambient light intensity. 
+* Apply diffuse lighting. But first I need to create a light source. For now, I will hardcode a point light to the left and behind the camera.  The intensity of the diffuse illumination on the surface of the sphere is proportional to the cosine of the surface norm and a vector pointing to the light source. This means the side of the sphere that is facing the light will receive maximum illumination and the sides of the sphere roughly 90 degrees and beyond will only receive ambient light. This is achieved by changing the intersects() function to return the norm and the reflected ray from the surface. We calculate the diffuse light intensity by taking the dot product of the norm and the normalized vector pointing to the light source. 
+```cpp
+ unsigned int* img = new unsigned int[RESX * RESY];
+  for (int row = 0; row < RESY; ++row) {
+    for (int col = 0; col < RESX; ++col) {
+      float px = screen.pos.x + screen.sizex * static_cast<float>(col) / RESX;
+      float py = screen.pos.y + screen.sizey * static_cast<float>(row) / RESY;
+      Ray ray{ vec{px, py, 0.f}, vec{0.f, 0.f, -1.f} };
+      float diffuse_light_intensity = 0.f;
+      Color final_color = BACKGROUND_COLOR;
+      if (auto reflected = intersects(sphere, ray)) {
+        vec lightDir = LIGHT_POS - reflected->reflection.pos;
+        lightDir.normalize();
+        diffuse_light_intensity = std::max(0.f, reflected->norm.dot(lightDir));
+        final_color = sphere.color * (AMBIENT_LIGHT_INTENSITY + diffuse_light_intensity);
+      }
+      img[RESX*(RESY - row - 1) + col] = final_color;
+    }
+  }
+```
+* The intersects() function modified to return a std::optional contain the norm and reflected ray at the intersection point. It returns nullopt if there is no intersection. 
+```cpp
+std::optional<ReflectionData> intersects(Sphere s, Ray incident) {
+  auto v_ray2sph_center = s.pos - incident.pos;
+  auto v_r2s_proj_ray = v_ray2sph_center.dot(incident.dir); // projection of ray_origin_to_sphere onto ray
+  if (v_r2s_proj_ray < 0.f) {  // if sphere is behind ray origin
+    return std::nullopt;
+  }
+  auto v_ray2sph_bis = incident.dir * v_r2s_proj_ray; // vector from ray origin to midway through the sphere along the ray
+  auto v_min_dist = v_ray2sph_bis - v_ray2sph_center; // vector from sphere center to closest point on the ray 
+  float d2 = v_min_dist.mag2();
+  float r2 = s.radius*s.radius; 
+  if (d2 > r2) { // if min distance between ray and sphere is greater than radius, then no intersection
+    return std::nullopt;
+  }
+  float cd2 = r2 - d2; // ratio of v_ray2sph_bis that is inside the sphere... squared
+  float ratio = 1.f - std::sqrtf(cd2) / v_ray2sph_bis.mag(); // the remaining portion of v_ray2sph_bis leads to the surface of the sphere
+  auto v_ray2sph_surface = v_ray2sph_bis * ratio;
+  auto p_sphere_surface = incident.pos + v_ray2sph_surface; 
+  auto v_norm = p_sphere_surface - s.pos;
+  v_norm.normalize();
+  auto v_reflection = reflect(incident.dir, v_norm);
+  return std::make_optional(ReflectionData(Ray(p_sphere_surface, v_reflection), v_norm));
+}
+```
