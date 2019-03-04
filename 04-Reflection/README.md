@@ -2,7 +2,7 @@
 
 ## Goals:
 * Create a sphere that relects its surroundings.  Try to make it look like a tree ornament.
-* switch to an existing vec3 implementation
+* Create a material class so I can have different reflection properties for different spheres.
 
 ## Result:
 ![](/04-Reflection/tracer/image.bmp)
