@@ -20,23 +20,24 @@ int main() {
   light_bulb2.bIsLightSource = true;
   std::vector<Sphere> shapes({ sphere, sphere2, sphere3, light_bulb, light_bulb2 });
 
-	unsigned int* img = new unsigned int[RESX * RESY];
-	for (int row = 0; row < RESY; ++row) {
-		for (int col = 0; col < RESX; ++col) {
-			float px = screen.pos.x + screen.sizex * static_cast<float>(col) / RESX;
-			float py = screen.pos.y + screen.sizey * static_cast<float>(row) / RESY;
+  unsigned int* img = new unsigned int[RESX * RESY];
+  for (int row = 0; row < RESY; ++row) {
+    for (int col = 0; col < RESX; ++col) {
+      float px = screen.pos.x + screen.sizex * static_cast<float>(col) / RESX;
+      float py = screen.pos.y + screen.sizey * static_cast<float>(row) / RESY;
       Ray ray{ vec{px, py, 0.f}, vec{0.f, 0.f, -1.f} };
+      // for debugging
       if (RESY - row - 1 == 300 && col == 350) {
         int blah = 0;
       }
       RayTracer tracer{ ray };
       img[RESX*(RESY - row - 1) + col] = tracer.trace(shapes);
-		}
-	}
+    }
+  }
 
   bool result = intarray2bmp::intarray2bmp("image.bmp", img, RESY, RESX);
 
-	delete[] img;
+  delete[] img;
 
   system("start  C:\\WINDOWS\\system32\\mspaint.exe C:\\Users\\caj34\\Documents\\repos\\animation_engine\\04-Reflection\\tracer\\image.bmp");
 }
