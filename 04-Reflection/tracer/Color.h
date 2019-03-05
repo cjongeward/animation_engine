@@ -21,9 +21,13 @@ public:
       (static_cast<unsigned>(255. * temp_color.color_vec.x) << 24);
   }
 
+  Color& operator+=(const Color& rhs) {
+    color_vec += rhs.color_vec;
+    return *this;
+  }
   Color operator+(const Color& rhs) const {
     Color ret = *this;
-    ret.color_vec += rhs.color_vec;
+    ret += rhs;
     return ret;
   }
   Color operator*(float rhs) const {

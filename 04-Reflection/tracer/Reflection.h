@@ -7,7 +7,7 @@ VEC reflect(const VEC& orig, const VEC& norm) {
   auto real_norm = norm;
   // negate the norm if it is pointing in the wrong direction
   if (orig_dot_norm > 0) {
-    real_norm = real_norm * -1.f;
+    real_norm = -real_norm;
   }
   return orig - real_norm * 2.f * orig.dot(real_norm);
 }
