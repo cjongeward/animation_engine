@@ -14,7 +14,7 @@ int main() {
   Sphere sphere{ vec{0.f, 0.f, -4.f}, WHITE, 1.f };
   Sphere sphere2{ vec{-2.5f, -2.f, -2.f}, GREEN, 0.75f };
 //  Sphere sphere3{ vec{2.5f, -1.f, -1.f}, PURPLE, 0.5f };
-  Sphere light_bulb{ vec{-10.f, 4.f, 4.f}, WHITE, 1.f };
+  Sphere light_bulb{ vec{-1.f, 4.f, 4.f}, WHITE, 1.f };
   Sphere light_bulb2{ vec{-2.f, 1.f, 4.f}, WHITE, 1.f };
   light_bulb.bIsLightSource = true;
   light_bulb2.bIsLightSource = true;

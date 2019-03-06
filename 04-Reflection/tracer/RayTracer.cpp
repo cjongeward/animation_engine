@@ -12,7 +12,7 @@ Color RayTracer::trace(const std::vector<Sphere>& shapes, const Ray& incidentRay
   bool bAnyColor = false;
   for (auto& shape : shapes) {
     if (&shape != curShape) {
-      if (auto reflected = intersects(shape, primary)) {
+      if (auto reflected = intersects(shape, incidentRay)) {
         bAnyColor = true;
         if (shape.bIsLightSource) {
           final_color = shape.color;
@@ -21,7 +21,7 @@ Color RayTracer::trace(const std::vector<Sphere>& shapes, const Ray& incidentRay
           constexpr float diffuse_mult = 0.2f;
           constexpr float spec_mult = 0.1f;
           constexpr float refl_mult = 0.5f;
-          final_color += shape.color * AMBIENT_LIGHT_INTENSITY;
+          final_color += shape.color * ambient_light_intensity;
           Color reflected_color = trace(shapes, reflected->reflection, depth + 1, &shape);
           final_color += reflected_color * refl_mult;
           for (auto& secondary_shape : shapes) {
@@ -39,7 +39,7 @@ Color RayTracer::trace(const std::vector<Sphere>& shapes, const Ray& incidentRay
     }
   }
   if (!bAnyColor) {
-    final_color = BLACK;
+    final_color = background_color;
   }
   return final_color;
 }
