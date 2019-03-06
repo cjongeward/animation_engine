@@ -41,6 +41,8 @@ const Color RED{ 0.7f, 0.1f, 0.1f };
 const Color GREEN{ 0.1f, 0.7f, 0.1f };
 const Color PURPLE{ 0.7f, 0.1f, 0.7f };
 const Color WHITE{ 1.f, 1.f, 1.f };
+const Color GREY{ 0.2f, 0.2f, 0.2f };
 const Color BLACK{ 0.f, 0.f, 0.f };
+const Color TURQ{ 0.1f, 0.8f, 0.8f };
 
 #endif

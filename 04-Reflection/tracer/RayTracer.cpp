@@ -15,23 +15,20 @@ Color RayTracer::trace(const std::vector<Sphere>& shapes, const Ray& incidentRay
       if (auto reflected = intersects(shape, incidentRay)) {
         bAnyColor = true;
         if (shape.bIsLightSource) {
-          final_color = shape.color;
+          final_color = shape.properties.color;
         }
         else {
-          constexpr float diffuse_mult = 0.2f;
-          constexpr float spec_mult = 0.1f;
-          constexpr float refl_mult = 0.5f;
-          final_color += shape.color * ambient_light_intensity;
+          final_color += shape.properties.color * ambient_light_intensity;
           Color reflected_color = trace(shapes, reflected->reflection, depth + 1, &shape);
-          final_color += reflected_color * refl_mult;
+          final_color += reflected_color * shape.properties.reflect_factor;
           for (auto& secondary_shape : shapes) {
             if (secondary_shape.bIsLightSource) {
               vec lightDir = secondary_shape.pos - reflected->reflection.pos;
               lightDir.normalize();
               float diffuse_light_intensity = std::max(0.f, reflected->norm.dot(lightDir));
-              float specular_light_intensity = std::powf(std::max(0.f, (-reflect(-lightDir, reflected->norm)).dot(primary.dir)), 50.f);
-              final_color += shape.color * diffuse_mult * diffuse_light_intensity +
-                secondary_shape.color * spec_mult * specular_light_intensity;
+              float specular_light_intensity = std::powf(std::max(0.f, (-reflect(-lightDir, reflected->norm)).dot(primary.dir)), shape.properties.specular_exp);
+              final_color += shape.properties.color * shape.properties.diffuse_factor * diffuse_light_intensity +
+                secondary_shape.properties.color * shape.properties.specular_factor * specular_light_intensity;
             }
           }
         }

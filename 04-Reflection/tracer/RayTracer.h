@@ -8,7 +8,7 @@
 
 class RayTracer {
   Ray primary;
-  Color background_color = BLACK;
+  Color background_color = TURQ;
   float ambient_light_intensity = AMBIENT_LIGHT_INTENSITY;
   int max_depth = 5;
 
