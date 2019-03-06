@@ -16,8 +16,6 @@ int main() {
   Sphere sphere3{ vec{2.5f, -1.f, -1.f}, BRIGHT, 0.5f };
   Sphere light_bulb{ vec{-10.f, 4.f, 4.f}, LIGHT, 1.f };
   Sphere light_bulb2{ vec{-2.f, 1.f, 4.f}, LIGHT, 1.f };
-  light_bulb.bIsLightSource = true;
-  light_bulb2.bIsLightSource = true;
   std::vector<Sphere> shapes({ sphere, sphere2, sphere3, light_bulb, light_bulb2 });
 
   unsigned int* img = new unsigned int[RESX * RESY];
