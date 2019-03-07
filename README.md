@@ -3,10 +3,15 @@ I want to make a ray tracer. It sounds fun and the concept seems pretty easy and
 
 ## Projects
 * [Basic Ray Tracer](1-Basic_Ray_Tracer/README.md)
+![](/1-Basic_Ray_Tracer/tracer/image.bmp)
 * [Spheres with diffuse shading](2-Diffuse_Lighting/README.md)
+![](/2-Diffuse_Lighting/tracer/image.bmp)
 * [Spheres with specular shading](3-Specular_Lighting/README.md)
+![](/3-Specular_Lighting/tracer/image.bmp)
 * [Spheres with Reflection](04-Reflection/README.md)
+![](/04-Reflection/tracer/image.bmp)
 * [Shapes - Planes, Rectangles, Boxes, Sticks](05-Shapes/README.md)
+![](/05-Shapes/tracer/image.bmp)
 * [Perspective viewing]
 * [rotations]
 * [shadows]
