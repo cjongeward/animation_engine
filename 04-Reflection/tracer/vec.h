@@ -74,4 +74,6 @@ public:
   }
 };
 
+float dist2(const vec& v1, const vec& v2);
+
 #endif

@@ -1,38 +1,53 @@
 #include "RayTracer.h"
 
 Color RayTracer::trace(const std::vector<Sphere>& shapes) {
-  return trace(shapes, primary, 0, nullptr);
+  return trace(shapes, primary_ray, 0, nullptr);
 }
 
 Color RayTracer::trace(const std::vector<Sphere>& shapes, const Ray& incidentRay, int depth, const Sphere* curShape) {
-  if (depth >= max_depth) {
+  if (depth >= max_depth) { // recursive base case
     return BLACK;
   }
-  Color final_color = BLACK;
-  bool bAnyColor = false;
+
+  // find the nearest hit point
+  const Sphere* pNearestShape = nullptr;
+  std::optional<ReflectionData> nearestReflection = std::nullopt;
   for (auto& shape : shapes) {
     if (&shape != curShape) {
-      if (auto reflected = intersects(shape, incidentRay)) {
-        bAnyColor = true;
-        final_color = shape.properties.color * shape.properties.intensity; // if shape is a light source
-        final_color += shape.properties.color * ambient_light_intensity;
-        Color reflected_color = trace(shapes, reflected->reflection, depth + 1, &shape);
-        final_color += reflected_color * shape.properties.reflect_factor;
-        for (auto& secondary_shape : shapes) {
-          if (&secondary_shape != &shape) {
-            vec lightDir = secondary_shape.pos - reflected->reflection.pos;
-            lightDir.normalize();
-            float diffuse_light_intensity = std::max(0.f, reflected->norm.dot(lightDir)) * secondary_shape.properties.intensity;
-            float specular_light_intensity = std::powf(std::max(0.f, (-reflect(-lightDir, reflected->norm)).dot(primary.dir)), shape.properties.specular_exp) * secondary_shape.properties.intensity;
-            final_color += shape.properties.color * shape.properties.diffuse_factor * diffuse_light_intensity +
-              secondary_shape.properties.color * shape.properties.specular_factor * specular_light_intensity;
-          }
+      auto reflected = intersects(shape, incidentRay);
+      if (reflected.has_value()) {
+        if (pNearestShape == nullptr) {
+          pNearestShape = &shape;
+          nearestReflection = reflected;
+        }
+        else if(dist2(reflected->reflection.pos, incidentRay.pos) < dist2(nearestReflection->reflection.pos, incidentRay.pos)) {
+          pNearestShape = &shape;
+          nearestReflection = reflected;
         }
       }
     }
   }
-  if (!bAnyColor) {
+
+  // light it up
+  Color final_color = BLACK;
+  if (!nearestReflection.has_value()) {
     final_color = background_color;
+  }
+  else {
+    final_color = pNearestShape->properties.color * pNearestShape->properties.intensity; // if shape is a light source
+    final_color += pNearestShape->properties.color * ambient_light_intensity;
+    Color reflected_color = trace(shapes, nearestReflection->reflection, depth + 1, pNearestShape);
+    final_color += reflected_color * pNearestShape->properties.reflect_factor;
+    for (auto& secondary_shape : shapes) {
+      if (&secondary_shape != pNearestShape) {
+        vec lightDir = secondary_shape.pos - nearestReflection->reflection.pos;
+        lightDir.normalize();
+        float diffuse_light_intensity = std::max(0.f, nearestReflection->norm.dot(lightDir)) * secondary_shape.properties.intensity;
+        float specular_light_intensity = std::powf(std::max(0.f, (-reflect(-lightDir, nearestReflection->norm)).dot(primary_ray.dir)), pNearestShape->properties.specular_exp) * secondary_shape.properties.intensity;
+        final_color += pNearestShape->properties.color * pNearestShape->properties.diffuse_factor * diffuse_light_intensity +
+          secondary_shape.properties.color * pNearestShape->properties.specular_factor * specular_light_intensity;
+      }
+    }
   }
   return final_color;
 }

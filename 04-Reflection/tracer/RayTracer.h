@@ -7,13 +7,13 @@
 #include "Settings.h"
 
 class RayTracer {
-  Ray primary;
-  Color background_color = TURQ;
+  Ray primary_ray;
+  Color background_color = TURQUOISE;
   float ambient_light_intensity = AMBIENT_LIGHT_INTENSITY;
   int max_depth = 5;
 
 public:
-  RayTracer(const Ray& t_primary) : primary{ t_primary } {}
+  RayTracer(const Ray& t_primary) : primary_ray{ t_primary } {}
   Color trace(const std::vector<Sphere>& shapes);
   Color trace(const std::vector<Sphere>& shapes, const Ray& incidentRay, int depth, const Sphere* curShape);
 };
