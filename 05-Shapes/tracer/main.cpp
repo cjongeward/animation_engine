@@ -17,7 +17,13 @@ int main() {
   Sphere sphere4{ vec{-2.0f, -1.5f, -4.f}, BRIGHT, 0.5f };
   Sphere light_bulb{ vec{-10.f, 4.f, 4.f}, LIGHT, 1.f };
   Sphere light_bulb2{ vec{-2.f, 1.f, 4.f}, LIGHT, 1.f };
-  std::vector<Sphere> shapes({ sphere, sphere2, sphere3, sphere4, light_bulb, light_bulb2 });
+  std::vector<std::unique_ptr<Shape>> shapes;
+  shapes.push_back(std::make_unique<Sphere>(sphere));
+  shapes.push_back(std::make_unique<Sphere>(sphere2));
+  shapes.push_back(std::make_unique<Sphere>(sphere3));
+  shapes.push_back(std::make_unique<Sphere>(sphere4));
+  shapes.push_back(std::make_unique<Sphere>(light_bulb));
+  shapes.push_back(std::make_unique<Sphere>(light_bulb2));
 
   unsigned int* img = new unsigned int[RESX * RESY];
   for (int row = 0; row < RESY; ++row) {

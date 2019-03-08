@@ -22,25 +22,32 @@ struct SurfaceProperties {
     intensity{t_intensity}
   {}
 };
-
 const SurfaceProperties MIRRORISH{ GREY, 0.3f, 1.0f, 100.f, 0.9f, 0.f };
 const SurfaceProperties DULL{ GREEN, 0.5f, 0.05f, 10.f, 0.0f, 0.f };
 const SurfaceProperties BRIGHT{ PURPLE, 0.5f, 0.7f, 100.f, 0.1f, 0.f };
 const SurfaceProperties LIGHT{ WHITE, 1.0f, 1.0f, 100.f, 0.0f, 1.f };
-
-
 
 struct Ray {
   vec pos;
   vec dir;
   Ray(const vec& t_pos, const vec& t_dir) : pos{ t_pos }, dir{ t_dir } {}
 };
+struct ReflectionData {
+  Ray reflection;
+  vec norm;
+  ReflectionData(const Ray& t_reflection, const vec& t_norm) : reflection{ t_reflection }, norm{ t_norm }{}
+};
 
-struct Sphere {
-  SurfaceProperties properties;
+struct Shape {
   vec pos;
+  SurfaceProperties properties;
+  Shape(const vec& t_pos, const SurfaceProperties& t_properties) : pos{ t_pos }, properties{ t_properties } {}
+  virtual std::optional<ReflectionData> intersects_with(const Ray& ray) const = 0;
+};
+struct Sphere : public Shape {
   float radius;
-  Sphere(const vec& t_pos, const SurfaceProperties& t_properties, float t_radius) : pos{ t_pos }, properties{ t_properties }, radius{ t_radius } {}
+  Sphere(const vec& t_pos, const SurfaceProperties& t_properties, float t_radius) : Shape{ t_pos, t_properties }, radius{ t_radius } {}
+  std::optional<ReflectionData> intersects_with(const Ray& ray) const override; 
 };
 
 struct Screen {
@@ -50,13 +57,9 @@ struct Screen {
   Screen(const vec& t_pos, float t_sizex, float t_sizey) : pos{ t_pos }, sizex{ t_sizex }, sizey{ t_sizey }{}
 };
 
-struct ReflectionData {
-  Ray reflection;
-  vec norm;
-  ReflectionData(const Ray& t_reflection, const vec& t_norm) : reflection{ t_reflection }, norm{ t_norm }{}
-};
 
-std::optional<ReflectionData> intersects(Sphere s, Ray incident);
+std::optional<ReflectionData> intersects(const Ray& incident_ray, const Shape& other);
+std::optional<ReflectionData> intersects(const Sphere& sphere, const Ray& incident_ray);
 
 
 #endif
