@@ -17,6 +17,9 @@ public:
   float dot(const vec& rhs) const {
     return x * rhs.x + y * rhs.y + z * rhs.z;
   }
+  vec cross(const vec& rhs) const {
+    return vec(y*rhs.z - z * rhs.y, z*rhs.x - x * rhs.z, x*rhs.y - y * rhs.x);
+  }
   void normalize() {
     auto overm = 1.0f / mag();
     x *= overm;

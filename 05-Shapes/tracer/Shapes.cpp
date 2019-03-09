@@ -28,7 +28,36 @@ std::optional<ReflectionData> intersects(const Sphere& sphere, const Ray& incide
   return std::make_optional(ReflectionData(Ray(p_sphere_surface, v_reflection), v_norm));
 }
 
+std::optional<ReflectionData> intersects(const Triangle & triangle, const Ray & incident_ray)
+{
+  const auto AmB = triangle.pos - triangle.pos2;
+  const auto AmC = triangle.pos - triangle.pos3;
+  const auto dir = incident_ray.dir;
+  const auto AmP = triangle.pos - incident_ray.pos;
+  const float detA = AmB.x * (AmC.y*dir.z - dir.y*AmC.z) + AmC.x * (dir.y*AmB.z - AmB.y*dir.z) + dir.x * (AmB.y*AmC.z - AmC.y*AmB.z);
+  const float tDet = AmB.x * (AmC.y*AmP.z - AmP.y*AmC.z) + AmC.x * (AmP.y*AmB.z - AmB.y*AmP.z) + AmP.x * (AmB.y*AmC.z - AmC.y*AmB.z);
+  const float gamDet = AmB.x * (AmP.y*dir.z - dir.y*AmP.z) + AmP.x * (dir.y*AmB.z - AmB.y*dir.z) + dir.x * (AmB.y*AmP.z - AmP.y*AmB.z);
+  const float betDet = AmP.x * (AmC.y*dir.z - dir.y*AmC.z) + AmC.x * (dir.y*AmP.z - AmP.y*dir.z) + dir.x * (AmP.y*AmC.z - AmC.y*AmP.z);
+  const float beta = betDet / detA;
+  const float gamma = gamDet / detA;
+  if (beta < 0.f || gamma < 0.f || beta + gamma > 1.f) {
+    return std::nullopt;
+  }
+
+  const float t = tDet / detA;
+  const auto hitPoint = incident_ray.pos + incident_ray.dir * t;
+  auto norm = AmB.cross(AmC);
+  norm.normalize();
+  auto reflection = reflect(incident_ray.dir, norm);
+  return std::make_optional(ReflectionData(Ray(hitPoint, reflection), norm));
+}
+
 std::optional<ReflectionData> Sphere::intersects_with(const Ray & ray) const
+{
+  return intersects(*this, ray); 
+}
+
+std::optional<ReflectionData> Triangle::intersects_with(const Ray & ray) const
 {
   return intersects(*this, ray); 
 }
