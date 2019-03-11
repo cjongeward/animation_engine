@@ -59,6 +59,16 @@ struct Triangle : public Shape {
   {}
   std::optional<ReflectionData> intersects_with(const Ray& ray) const override; 
 };
+struct Rect : public Shape {
+  vec pos2;
+  vec pos3;
+  Rect(const vec& t_pos, const vec& t_pos2, const vec& t_pos3, const SurfaceProperties& t_properties) : 
+    Shape{ t_pos, t_properties }, 
+    pos2{ t_pos2 }, 
+    pos3{ t_pos3 }
+  {}
+  std::optional<ReflectionData> intersects_with(const Ray& ray) const override; 
+};
 
 struct Screen {
   vec pos;
@@ -71,6 +81,7 @@ struct Screen {
 std::optional<ReflectionData> intersects(const Ray& incident_ray, const Shape& other);
 std::optional<ReflectionData> intersects(const Sphere& sphere, const Ray& incident_ray);
 std::optional<ReflectionData> intersects(const Triangle& triangle, const Ray& incident_ray);
+std::optional<ReflectionData> intersects(const Rect& rect, const Ray& incident_ray);
 
 
 #endif

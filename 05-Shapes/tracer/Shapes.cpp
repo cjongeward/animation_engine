@@ -1,3 +1,5 @@
+#include <vector>
+#include <functional>
 #include "Shapes.h"
 
 std::optional<ReflectionData> intersects(const Ray & incident_ray, const Shape& other)
@@ -28,12 +30,16 @@ std::optional<ReflectionData> intersects(const Sphere& sphere, const Ray& incide
   return std::make_optional(ReflectionData(Ray(p_sphere_surface, v_reflection), v_norm));
 }
 
-std::optional<ReflectionData> intersects(const Triangle & triangle, const Ray & incident_ray)
+
+std::optional<ReflectionData> intersects(const vec & pos1, const vec& pos2, const vec& pos3, const Ray & incident_ray, std::function<bool(float, float)> func)
 {
-  const auto AmB = triangle.pos - triangle.pos2;
-  const auto AmC = triangle.pos - triangle.pos3;
+  // use Cramers rule to solve for barycentric coordinates (alpha and gamma) and t in this equation
+  // incident_ray.pos + incident_ray.dir * t = pos1 + alpha * (pos2 - pos1) + gamma * (pos3 - pos1);
+  const auto AmB = pos1 - pos2;
+  const auto AmC = pos1 - pos3;
   const auto dir = incident_ray.dir;
-  const auto AmP = triangle.pos - incident_ray.pos;
+  const auto AmP = pos1 - incident_ray.pos;
+  // Determinates...  really need to use a matrix class that has a det method`
   const float detA = AmB.x * (AmC.y*dir.z - dir.y*AmC.z) + AmC.x * (dir.y*AmB.z - AmB.y*dir.z) + dir.x * (AmB.y*AmC.z - AmC.y*AmB.z);
   const float tDet = AmB.x * (AmC.y*AmP.z - AmP.y*AmC.z) + AmC.x * (AmP.y*AmB.z - AmB.y*AmP.z) + AmP.x * (AmB.y*AmC.z - AmC.y*AmB.z);
   const float gamDet = AmB.x * (AmP.y*dir.z - dir.y*AmP.z) + AmP.x * (dir.y*AmB.z - AmB.y*dir.z) + dir.x * (AmB.y*AmP.z - AmP.y*AmB.z);
@@ -41,15 +47,29 @@ std::optional<ReflectionData> intersects(const Triangle & triangle, const Ray & 
   const float beta = betDet / detA;
   const float gamma = gamDet / detA;
   const float t = tDet / detA;
-  if (beta < 0.f || gamma < 0.f || beta + gamma > 1.f || t < 0.f) {
+  // detect intersection if barycentric coordinates between 0 and 1, and t is positive
+  if(!func(beta, gamma) || t < 0.f) {
     return std::nullopt;
   }
-
   const auto hitPoint = incident_ray.pos + incident_ray.dir * t;
   auto norm = AmB.cross(AmC);
   norm.normalize();
   auto reflection = reflect(incident_ray.dir, norm);
   return std::make_optional(ReflectionData(Ray(hitPoint, reflection), norm));
+}
+
+std::optional<ReflectionData> intersects(const Triangle & triangle, const Ray & incident_ray)
+{
+  return intersects(triangle.pos, triangle.pos2, triangle.pos3, incident_ray, [](float beta, float gamma) {
+    return beta >= 0.f && gamma >= 0.f && beta + gamma <= 1.f;
+  });
+}
+
+std::optional<ReflectionData> intersects(const Rect & rect, const Ray & incident_ray)
+{
+  return intersects(rect.pos, rect.pos2, rect.pos3, incident_ray, [](float beta, float gamma) {
+    return beta >= 0.f && gamma >= 0.f && beta <= 1.f && gamma <= 1.f;
+  });
 }
 
 std::optional<ReflectionData> Sphere::intersects_with(const Ray & ray) const
@@ -58,6 +78,11 @@ std::optional<ReflectionData> Sphere::intersects_with(const Ray & ray) const
 }
 
 std::optional<ReflectionData> Triangle::intersects_with(const Ray & ray) const
+{
+  return intersects(*this, ray); 
+}
+
+std::optional<ReflectionData> Rect::intersects_with(const Ray & ray) const
 {
   return intersects(*this, ray); 
 }
