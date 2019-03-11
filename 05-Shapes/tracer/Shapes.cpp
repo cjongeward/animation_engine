@@ -40,11 +40,11 @@ std::optional<ReflectionData> intersects(const Triangle & triangle, const Ray & 
   const float betDet = AmP.x * (AmC.y*dir.z - dir.y*AmC.z) + AmC.x * (dir.y*AmP.z - AmP.y*dir.z) + dir.x * (AmP.y*AmC.z - AmC.y*AmP.z);
   const float beta = betDet / detA;
   const float gamma = gamDet / detA;
-  if (beta < 0.f || gamma < 0.f || beta + gamma > 1.f) {
+  const float t = tDet / detA;
+  if (beta < 0.f || gamma < 0.f || beta + gamma > 1.f || t < 0.f) {
     return std::nullopt;
   }
 
-  const float t = tDet / detA;
   const auto hitPoint = incident_ray.pos + incident_ray.dir * t;
   auto norm = AmB.cross(AmC);
   norm.normalize();

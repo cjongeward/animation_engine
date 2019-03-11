@@ -17,7 +17,8 @@ int main() {
   Sphere sphere4{ vec{-2.0f, -1.5f, -4.f}, BRIGHT, 0.5f };
   Sphere light_bulb{ vec{-10.f, 4.f, 4.f}, LIGHT, 1.f };
   Sphere light_bulb2{ vec{-2.f, 1.f, 4.f}, LIGHT, 1.f };
-  Triangle tri{ vec{0.f, 0.f, -2.f}, vec{0.f, -2.f, -2.f}, vec{2.f, -2.f, -2.f}, DULL };
+  Triangle tri{ vec{0.f, -1.f, -2.f}, vec{0.f, -2.f, -2.f}, vec{2.f, -2.f, -2.f}, DULL };
+  Triangle tri2{ vec{-3.f, 2.f, -2.f}, vec{0.f, 2.f, -2.f}, vec{-2.f, -1.f, -2.f}, BRIGHT };
   std::vector<std::unique_ptr<Shape>> shapes;
   shapes.push_back(std::make_unique<Sphere>(sphere));
   shapes.push_back(std::make_unique<Sphere>(sphere2));
@@ -26,6 +27,7 @@ int main() {
   shapes.push_back(std::make_unique<Sphere>(light_bulb));
   shapes.push_back(std::make_unique<Sphere>(light_bulb2));
   shapes.push_back(std::make_unique<Triangle>(tri));
+  shapes.push_back(std::make_unique<Triangle>(tri2));
 
   unsigned int* img = new unsigned int[RESX * RESY];
   for (int row = 0; row < RESY; ++row) {
