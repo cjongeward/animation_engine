@@ -121,6 +121,7 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="RayTracer.cpp" />
+    <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shapes.cpp" />
     <ClCompile Include="vec.cpp" />
   </ItemGroup>
@@ -129,6 +130,7 @@
     <ClInclude Include="Color.h" />
     <ClInclude Include="RayTracer.h" />
     <ClInclude Include="Reflection.h" />
+    <ClInclude Include="Scene.h" />
     <ClInclude Include="Settings.h" />
     <ClInclude Include="Shapes.h" />
     <ClInclude Include="vec.h" />
