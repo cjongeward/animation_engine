@@ -2,7 +2,7 @@
 #define SCENE_H_
 #include <vector>
 #include <memory>
-class Shape;
+struct Shape;
 
 class Scene {
 public:
