@@ -14,6 +14,10 @@ std::vector<std::unique_ptr<Shape>> Scene::getFrame()
   Rect rect{ vec{1.f, 1.8f, -6.f}, vec{1.f, 1.f, -6.5f}, vec{0.5f, 2.f, -6.5f}, BRIGHT };
   Rect rect2{ vec{1.f, 1.8f, -6.f}, vec{1.f, 1.f, -6.5f}, vec{1.5f, 2.f, -6.5f}, BRIGHT };
   Rect rect3{ vec{1.f, 1.8f, -6.f}, vec{0.5f, 2.f, -6.5f}, vec{1.5f, 2.f, -6.5f}, BRIGHT };
+  Rect floor{ vec{-10.f, -4.f, -20.f}, vec{10.f, -4.f, -20.f}, vec{-10.f, -4.f, 0.f}, GRAYISH };
+  Rect wall1{ vec{-10.f, -4.f, -20.f}, vec{-10.f, 4.f, -20.f}, vec{-10.f, -4.f, 0.f}, YELLOWISH };
+  Rect wall2{ vec{10.f, -4.f, -20.f}, vec{10.f, 4.f, -20.f}, vec{10.f, -4.f, 0.f}, YELLOWISH };
+  Rect wall3{ vec{-10.f, -4.f, -20.f}, vec{-10.f, 4.f, -20.f}, vec{10.f, -4.f, -20.f}, YELLOWISH };
   std::vector<std::unique_ptr<Shape>> shapes;
   shapes.push_back(std::make_unique<Sphere>(sphere));
   shapes.push_back(std::make_unique<Sphere>(sphere2));
@@ -26,5 +30,9 @@ std::vector<std::unique_ptr<Shape>> Scene::getFrame()
   shapes.push_back(std::make_unique<Rect>(rect));
   shapes.push_back(std::make_unique<Rect>(rect2));
   shapes.push_back(std::make_unique<Rect>(rect3));
+  shapes.push_back(std::make_unique<Rect>(floor));
+  shapes.push_back(std::make_unique<Rect>(wall1));
+  shapes.push_back(std::make_unique<Rect>(wall2));
+  shapes.push_back(std::make_unique<Rect>(wall3));
   return shapes;
 }

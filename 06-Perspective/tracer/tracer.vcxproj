@@ -120,6 +120,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="RayGenerator.cpp" />
     <ClCompile Include="RayTracer.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Shapes.cpp" />
@@ -128,6 +129,7 @@
   <ItemGroup>
     <ClInclude Include="ArrToBmp.h" />
     <ClInclude Include="Color.h" />
+    <ClInclude Include="RayGenerator.h" />
     <ClInclude Include="RayTracer.h" />
     <ClInclude Include="Reflection.h" />
     <ClInclude Include="Scene.h" />

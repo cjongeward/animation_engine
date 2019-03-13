@@ -26,6 +26,8 @@ const SurfaceProperties MIRRORISH{ GREY, 0.3f, 1.0f, 100.f, 0.9f, 0.f };
 const SurfaceProperties DULL{ GREEN, 0.5f, 0.05f, 10.f, 0.0f, 0.f };
 const SurfaceProperties BRIGHT{ PURPLE, 0.5f, 0.7f, 100.f, 0.1f, 0.f };
 const SurfaceProperties LIGHT{ WHITE, 1.0f, 1.0f, 100.f, 0.0f, 1.f };
+const SurfaceProperties GRAYISH{ LIGHTGREY, 0.5f, 0.15f, 10.f, 0.0f, 0.f };
+const SurfaceProperties YELLOWISH{ Color{0.f, 0.6f, 0.3f}, 0.5f, 0.15f, 10.f, 0.0f, 0.f };
 
 struct Ray {
   vec pos;

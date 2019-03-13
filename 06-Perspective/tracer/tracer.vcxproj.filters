@@ -22,6 +22,9 @@
     <ClCompile Include="Scene.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="RayGenerator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ArrToBmp.h">
@@ -46,6 +49,9 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Scene.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="RayGenerator.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

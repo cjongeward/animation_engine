@@ -5,19 +5,18 @@
 #include "Shapes.h"
 #include "RayTracer.h"
 #include "Scene.h"
+#include "RayGenerator.h"
 #include "Settings.h"
 
 
 int main() {
-  Screen screen{ vec{-4.f, -3.f, 0.f}, 8.f, 6.f };
+  PerspectiveRayGenerator rayGenerator{ Screen{ vec{-4.f, -3.f, 0.f}, 8.f, 6.f }, vec{0.f, 0.f, 10.f} };
   Scene scene;
   auto shapes = scene.getFrame();
   unsigned int* img = new unsigned int[RESX * RESY];
   for (int row = 0; row < RESY; ++row) {
     for (int col = 0; col < RESX; ++col) {
-      float px = screen.pos.x + screen.sizex * static_cast<float>(col) / RESX;
-      float py = screen.pos.y + screen.sizey * static_cast<float>(row) / RESY;
-      Ray ray{ vec{px, py, 0.f}, vec{0.f, 0.f, -1.f} };
+      Ray ray = rayGenerator.MakeRay(row, col);
       // for debugging
       if (RESY - row - 1 == 330 && col == 360) {
         int blah = 0;
