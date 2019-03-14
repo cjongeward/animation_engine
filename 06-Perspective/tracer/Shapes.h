@@ -22,7 +22,7 @@ struct SurfaceProperties {
     intensity{t_intensity}
   {}
 };
-const SurfaceProperties MIRRORISH{ GREY, 0.3f, 1.0f, 100.f, 0.9f, 0.f };
+const SurfaceProperties MIRRORISH{ GREY, 0.4f, 0.0f, 100.f, 0.9f, 0.f };
 const SurfaceProperties DULL{ GREEN, 0.5f, 0.05f, 10.f, 0.0f, 0.f };
 const SurfaceProperties BRIGHT{ PURPLE, 0.5f, 0.7f, 100.f, 0.1f, 0.f };
 const SurfaceProperties LIGHT{ WHITE, 1.0f, 1.0f, 100.f, 0.0f, 1.f };

@@ -35,8 +35,8 @@ std::optional<ReflectionData> intersects(const vec & pos1, const vec& pos2, cons
 {
   // use Cramers rule to solve for barycentric coordinates (alpha and gamma) and t in this equation
   // incident_ray.pos + incident_ray.dir * t = pos1 + alpha * (pos2 - pos1) + gamma * (pos3 - pos1);
-  const auto AmB = pos1 - pos2;
-  const auto AmC = pos1 - pos3;
+  const auto AmC = pos1 - pos2;
+  const auto AmB = pos1 - pos3;
   const auto dir = incident_ray.dir;
   const auto AmP = pos1 - incident_ray.pos;
   // Determinates...  really need to use a matrix class that has a det method`
@@ -47,12 +47,13 @@ std::optional<ReflectionData> intersects(const vec & pos1, const vec& pos2, cons
   const float beta = betDet / detA;
   const float gamma = gamDet / detA;
   const float t = tDet / detA;
-  // detect intersection if barycentric coordinates between 0 and 1, and t is positive
-  if(!func(beta, gamma) || t < 0.f) {
+  auto norm = AmB.cross(AmC);
+  const float incident_dot_norm = incident_ray.dir.dot(norm);
+  // detect intersection if barycentric coordinates between 0 and 1, t is positive, and surface is facing the ray
+  if(!func(beta, gamma) || t < 0.f || incident_dot_norm < 0.f) {
     return std::nullopt;
   }
   const auto hitPoint = incident_ray.pos + incident_ray.dir * t;
-  auto norm = AmB.cross(AmC);
   norm.normalize();
   auto reflection = reflect(incident_ray.dir, norm);
   return std::make_optional(ReflectionData(Ray(hitPoint, reflection), norm));

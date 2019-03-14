@@ -18,7 +18,7 @@ int main() {
     for (int col = 0; col < RESX; ++col) {
       Ray ray = rayGenerator.MakeRay(row, col);
       // for debugging
-      if (RESY - row - 1 == 330 && col == 360) {
+      if (RESY - row - 1 == 440 && col == 440) {
         int blah = 0;
       }
       RayTracer tracer{ ray };
