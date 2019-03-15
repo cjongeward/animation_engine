@@ -1,5 +1,5 @@
 # Ray Tracer - Animation Engine
-I want to make a ray tracer. It sounds fun and the concept seems pretty easy and straightforward. You create a virtual “scene” behind your computer screen. Then, for each pixel on your screen, you shoot a ray into the scene (a ray is just a line with a starting point and a direction).  The ray collides and reflects with the various objects in the scene and tracks color and lighting data which all contributed to the final color of the pixel. It can be a very accurate, not to mention computationally expensive way of rendering a realistic scene.  I’m going to make one.
+This is my ray tracer project. I have split it up into sub-projects that each aim to accomplish a specific goal and build off of the previous sub-project. The output for each project is a bitmap file which are all displayed below. At the moment, all the sub-projects are built with Visual Studio 2017 using the latest C++ standard and have no dependencies. 
 
 ## Projects
 * [Basic Ray Tracer](1-Basic_Ray_Tracer/README.md)
@@ -12,7 +12,8 @@ I want to make a ray tracer. It sounds fun and the concept seems pretty easy and
 ![](/04-Reflection/tracer/image.bmp)
 * [Shapes - Planes, Rectangles, Boxes, Sticks](05-Shapes/README.md)
 ![](/05-Shapes/tracer/image.bmp)
-* [Perspective viewing]
+* [Perspective viewing](06-Perspective/README.md)
+![](/06-Perspective/tracer/image.bmp)
 * [rotations]
 * [shadows]
 * [anti-aliasing]
