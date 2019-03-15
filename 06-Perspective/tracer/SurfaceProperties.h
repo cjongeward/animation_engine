@@ -9,7 +9,7 @@ struct SurfaceProperties {
   float specular_exp;
   float reflect_factor;
   float intensity;
-  SurfaceProperties(const Color& t_color, float t_diffuse, float t_spec, float t_spec_exp, float t_reflect, float t_intensity) :
+  constexpr SurfaceProperties(const Color& t_color, float t_diffuse, float t_spec, float t_spec_exp, float t_reflect, float t_intensity) :
     color{ t_color },
     diffuse_factor{ t_diffuse },
     specular_factor{ t_spec },
@@ -18,13 +18,13 @@ struct SurfaceProperties {
     intensity{t_intensity}
   {}
 };
-const SurfaceProperties MIRRORISH{ GREY, 0.4f, 0.0f, 100.f, 0.9f, 0.f };
-const SurfaceProperties DULL{ GREEN, 0.5f, 0.05f, 10.f, 0.0f, 0.f };
-const SurfaceProperties BRIGHT{ PURPLE, 0.5f, 0.7f, 100.f, 0.1f, 0.f };
-const SurfaceProperties LIGHT{ WHITE, 1.0f, 1.0f, 100.f, 0.0f, 1.f };
-const SurfaceProperties GRAYISH{ LIGHTGREY, 0.5f, 0.15f, 10.f, 0.0f, 0.f };
-const SurfaceProperties WHITEISH{ REALLYLIGHTGREY, 0.5f, 0.0f, 10.f, 0.0f, 0.f };
-const SurfaceProperties YELLOWISH{ Color{0.f, 0.6f, 0.3f}, 0.5f, 0.15f, 10.f, 0.0f, 0.f };
+constexpr SurfaceProperties MIRRORISH{ GREY, 0.4f, 0.0f, 100.f, 0.9f, 0.f };
+constexpr SurfaceProperties DULL{ GREEN, 0.5f, 0.05f, 10.f, 0.0f, 0.f };
+constexpr SurfaceProperties BRIGHT{ PURPLE, 0.5f, 0.7f, 100.f, 0.1f, 0.f };
+constexpr SurfaceProperties LIGHT{ WHITE, 1.0f, 1.0f, 100.f, 0.0f, 1.f };
+constexpr SurfaceProperties GRAYISH{ LIGHTGREY, 0.5f, 0.15f, 10.f, 0.0f, 0.f };
+constexpr SurfaceProperties WHITEISH{ REALLYLIGHTGREY, 0.5f, 0.0f, 10.f, 0.0f, 0.f };
+constexpr SurfaceProperties YELLOWISH{ Color{0.f, 0.6f, 0.3f}, 0.5f, 0.15f, 10.f, 0.0f, 0.f };
 
 
 #endif
