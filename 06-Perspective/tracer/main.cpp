@@ -10,7 +10,7 @@
 
 
 int main() {
-  PerspectiveRayGenerator rayGenerator{ Screen{ vec{-4.f, -3.f, 0.f}, 8.f, 6.f }, vec{0.f, 0.f, 10.f} };
+  PerspectiveRayGenerator rayGenerator{ Screen{ vec{-4.f, -3.f, 0.f}, SCREEN_SIZE_X, SCREEN_SIZE_Y }, vec{0.f, 0.f, FOCAL_DIST} };
   Scene scene;
   auto shapes = scene.getFrame();
   unsigned int* img = new unsigned int[RESX * RESY];
@@ -18,7 +18,7 @@ int main() {
     for (int col = 0; col < RESX; ++col) {
       Ray ray = rayGenerator.MakeRay(row, col);
       // for debugging
-      if (RESY - row - 1 == 440 && col == 440) {
+      if (RESY - row - 1 == 200 && col == 150) {
         int blah = 0;
       }
       RayTracer tracer{ ray };

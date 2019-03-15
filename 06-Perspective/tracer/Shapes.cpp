@@ -47,14 +47,15 @@ std::optional<ReflectionData> intersects(const vec & pos1, const vec& pos2, cons
   const float beta = betDet / detA;
   const float gamma = gamDet / detA;
   const float t = tDet / detA;
-  auto norm = AmB.cross(AmC);
-  const float incident_dot_norm = incident_ray.dir.dot(norm);
+  auto norm_inv = AmB.cross(AmC);
+  const float incident_dot_norm = incident_ray.dir.dot(norm_inv);
   // detect intersection if barycentric coordinates between 0 and 1, t is positive, and surface is facing the ray
   if(!func(beta, gamma) || t < 0.f || incident_dot_norm < 0.f) {
     return std::nullopt;
   }
   const auto hitPoint = incident_ray.pos + incident_ray.dir * t;
-  norm.normalize();
+  norm_inv.normalize();
+  const auto norm = -norm_inv;
   auto reflection = reflect(incident_ray.dir, norm);
   return std::make_optional(ReflectionData(Ray(hitPoint, reflection), norm));
 }

@@ -135,6 +135,7 @@
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Settings.h" />
     <ClInclude Include="Shapes.h" />
+    <ClInclude Include="SurfaceProperties.h" />
     <ClInclude Include="vec.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

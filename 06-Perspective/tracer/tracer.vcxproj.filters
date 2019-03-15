@@ -54,5 +54,8 @@
     <ClInclude Include="RayGenerator.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="SurfaceProperties.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
