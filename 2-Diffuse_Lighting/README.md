@@ -8,6 +8,7 @@ The last exercise gave me a bright red circle. I know that it’s really a red s
 I will apply three different types of lighting over the next two projects, ambient lighting, diffuse lighting, and specular lighting. 
 * ambient lighting is used to illuminate a surface that is not exposed to any direct lighting. In the real world, light repeatedly bounces off surfaces and molecules in the atmosphere and whatnot to indirectly illuminate surfaces. I will approximate that lighting by simply illuminating every surface in the scene with a low level of light. There are techniques to make ambient lighting more realistic and I’ll expand on this later. 
 * Diffuse shading and specular shading both describe how light reflects from a surface, but they represent opposite ends of the shininess spectrum.  So any light reflecting from a surface lies somewhere between fully diffuse and fully specular. Fully diffuse reflection means the light is reflected evenly in every direction in the hemisphere of the incident light. This creates a color that appears flat and chalky. Fully specular reflection means that the light source will reflect off the surface in one direction. This would create the appearance of a mirror. I’ll implement fully diffuse reflection in this project and then add a specular component in the next project. 
+![](napkins/diffuse.jpg)
 
 ## Goals:
 * apply ambient lighting to the entire sphere. 
@@ -39,7 +40,7 @@ public:
   }
 }
 ```
-* Move the sphere into a container.  I will eventually want to render more than one shape so I will need a poloymorphic shape type and a container to hold them. For now, I will move the sphere into a std::vector and change the tracer code to iterate the std::vector. 
+* Move the sphere into a container.  I will eventually want to render more than one shape so I will need a polymorphic shape type and a container to hold them. For now, I will move the sphere into a std::vector and change the tracer code to iterate the std::vector. 
 * Apply ambient lighting. To do this, I set a global const float to the ambient light intensity.  The entire surface of the sphere will be rendered as it’s color (red) multiplied by the ambient light intensity. 
 * Apply diffuse lighting. But first I need to create a light source. For now, I will hardcode a point light to the left and behind the camera.  The intensity of the diffuse illumination on the surface of the sphere is proportional to the cosine of the surface norm and a vector pointing to the light source. This means the side of the sphere that is facing the light will receive maximum illumination and the sides of the sphere roughly 90 degrees and beyond will only receive ambient light. This is achieved by changing the intersects() function to return the norm and the reflected ray from the surface. We calculate the diffuse light intensity by taking the dot product of the norm and the normalized vector pointing to the light source. 
 ```cpp
@@ -62,6 +63,7 @@ public:
   }
 ```
 * The intersects() function modified to return a std::optional contain the norm and reflected ray at the intersection point. It returns nullopt if there is no intersection. 
+![](napkins/rs-intersect2.jpg)
 ```cpp
 std::optional<ReflectionData> intersects(Sphere s, Ray incident) {
   auto v_ray2sph_center = s.pos - incident.pos;
