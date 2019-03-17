@@ -7,7 +7,7 @@ To simulate diffuse light, we used the dot product of the surface norm and the l
 
 So I will fall back to the dot product again, but this time I’ll be using the dot product of the reflected vector and the primary ray. This way, the intensity of the illumination will be proportional to the cosine of two vectors, similar to diffuse illumination but with different vectors. 
 
-So, pure reflection gives me a mirror, but the dot product method above will result in a kind of fully diffuse reflection that will not look shiny. I need to be able to tune the shininess. We do that with an exponent, we’ll call it the specular exponent. Both the ray direction vector and the reflection vector are unit vectors so the dot product will always be <= 1 (see lessons learned for horror stories involving non normalized vectors).  Applying an exponent that is greater than 1 to the dot product will help localize the reflected light. A small specular exponent of 10ish will result in a slightly shiny surface resembling old plastic. A high exponent of 250ish will give us a much shinier surface like, I don’t know, shiny plastic or something. This method is referred to as Bling-Phong shading. It’s also worth mentioning that the diffuse implementation from the previous project is called Lambertian shading. 
+So, pure reflection gives me a mirror, but the dot product method above will result in a kind of fully diffuse reflection that will not look shiny. I need to be able to tune the shininess. We do that with an exponent, we’ll call it the specular exponent. Both the ray direction vector and the reflection vector are unit vectors so the dot product will always be <= 1 (see lessons learned for horror stories involving non normalized vectors).  Applying an exponent that is greater than 1 to the dot product will help localize the reflected light. A small specular exponent of 10ish will result in a slightly shiny surface resembling old plastic. A high exponent of 250ish will give us a much shinier surface like, I don’t know, shiny plastic or something. This method is referred to as Blinn-Phong shading. It’s also worth mentioning that the diffuse implementation from the previous project is called Lambertian shading. 
 
 ## Goals:
 * Implement specular shading on the sphere
@@ -44,10 +44,6 @@ final_color = final_color + shape.color * diffuse_mult * diffuse_light_intensity
 ```
 
 ## Lessons Learned:
-* Always normalize vectors that represent direction. It feels wasteful to do so many square root operations but seriously, the equations all fail if the vectors are not normalized
-
-
-
-
+* Always normalize vectors that represent direction. It feels wasteful to do so many square root operations but seriously, the equations all fail if the vectors are not normalized. 
 
 
