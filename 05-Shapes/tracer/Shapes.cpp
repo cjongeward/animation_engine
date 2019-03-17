@@ -2,11 +2,6 @@
 #include <functional>
 #include "Shapes.h"
 
-std::optional<ReflectionData> intersects(const Ray & incident_ray, const Shape& other)
-{
-  return other.intersects_with(incident_ray);
-}
-
 std::optional<ReflectionData> intersects(const Sphere& sphere, const Ray& incident_ray) {
   auto v_ray2sph_center = sphere.pos - incident_ray.pos;
   auto v_r2s_proj_ray = v_ray2sph_center.dot(incident_ray.dir); // projection of ray_origin_to_sphere onto ray

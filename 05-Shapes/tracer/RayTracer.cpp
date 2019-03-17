@@ -16,7 +16,7 @@ Color RayTracer::trace(const std::vector<std::unique_ptr<Shape>>& shapes, const 
     Shape* pShape = shape_ref.get();
     Shape& shape = *pShape;
     if (&shape != curShape) {
-      auto reflected = intersects(incidentRay, shape);
+      auto reflected = shape.intersects_with(incidentRay);
       if (reflected.has_value()) {
         if (!nearestReflection.has_value()) {
           pNearestShape = &shape;
