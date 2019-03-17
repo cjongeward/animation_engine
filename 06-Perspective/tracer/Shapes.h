@@ -57,7 +57,6 @@ struct Screen {
 };
 
 
-std::optional<ReflectionData> intersects(const Ray& incident_ray, const Shape& other);
 std::optional<ReflectionData> intersects(const Sphere& sphere, const Ray& incident_ray);
 std::optional<ReflectionData> intersects(const Triangle& triangle, const Ray& incident_ray);
 std::optional<ReflectionData> intersects(const Rect& rect, const Ray& incident_ray);
