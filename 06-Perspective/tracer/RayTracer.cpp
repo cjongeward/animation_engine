@@ -1,10 +1,10 @@
 #include "RayTracer.h"
 
-Color RayTracer::trace(const std::vector<std::unique_ptr<Shape>>& shapes) {
+Color RayTracer::trace(const std::vector<std::unique_ptr<Shape>>& shapes) const {
   return trace(shapes, primary_ray, 0, nullptr);
 }
 
-Color RayTracer::trace(const std::vector<std::unique_ptr<Shape>>& shapes, const Ray& incidentRay, int depth, const Shape* curShape) {
+Color RayTracer::trace(const std::vector<std::unique_ptr<Shape>>& shapes, const Ray& incidentRay, int depth, const Shape* curShape) const {
   if (depth >= max_depth) { // recursive base case
     return BLACK;
   }

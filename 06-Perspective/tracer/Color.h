@@ -8,11 +8,13 @@ class Color {
 
 public:
   constexpr Color(float red, float green, float blue) : color_vec{ red, green, blue } {}
+  // colors greater than 1.0 are invalid
   constexpr void clamp() {
     color_vec.x = std::min(1.f, std::max(0.f, color_vec.x));
     color_vec.y = std::min(1.f, std::max(0.f, color_vec.y));
     color_vec.z = std::min(1.f, std::max(0.f, color_vec.z));
   }
+  // Implicit conversion to 8-bit colors
   constexpr operator unsigned() const {
     Color temp_color = *this;
     temp_color.clamp();

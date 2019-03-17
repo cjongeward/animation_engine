@@ -11,6 +11,7 @@ struct Ray {
   vec dir;
   Ray(const vec& t_pos, const vec& t_dir) : pos{ t_pos }, dir{ t_dir } {}
 };
+// data packet containing important data from a reflection
 struct ReflectionData {
   Ray reflection;
   vec norm;
@@ -49,6 +50,7 @@ struct Rect : public Shape {
   std::optional<ReflectionData> intersects_with(const Ray& ray) const override; 
 };
 
+// This should probably go somewhere else
 struct Screen {
   vec pos;
   float sizex;

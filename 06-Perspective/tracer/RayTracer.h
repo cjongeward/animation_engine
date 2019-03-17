@@ -9,16 +9,16 @@
 
 class RayTracer {
 private:
-  Ray primary_ray;
-  Color background_color = TURQUOISE;
-  float ambient_light_intensity = AMBIENT_LIGHT_INTENSITY;
-  int max_depth = 5;
+  const Ray primary_ray;
+  const Color background_color = TURQUOISE;
+  const float ambient_light_intensity = AMBIENT_LIGHT_INTENSITY;
+  const int max_depth = MAX_RECURSIVE_DEPTH;
 
-  Color trace(const std::vector<std::unique_ptr<Shape>>& shapes, const Ray& incidentRay, int depth, const Shape* curShape);
+  Color trace(const std::vector<std::unique_ptr<Shape>>& shapes, const Ray& incidentRay, int depth, const Shape* curShape) const;
 
 public:
   RayTracer(const Ray& t_primary) : primary_ray{ t_primary } {}
-  Color trace(const std::vector<std::unique_ptr<Shape>>& shapes);
+  Color trace(const std::vector<std::unique_ptr<Shape>>& shapes) const;
 };
 
 

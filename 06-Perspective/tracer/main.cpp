@@ -10,7 +10,9 @@
 
 
 int main() {
-  PerspectiveRayGenerator rayGenerator{ Screen{ vec{-4.f, -3.f, 0.f}, SCREEN_SIZE_X, SCREEN_SIZE_Y }, vec{0.f, 0.f, FOCAL_DIST} };
+  const Screen screen{ vec{-4.f, -3.f, 0.f}, SCREEN_SIZE_X, SCREEN_SIZE_Y };
+  const vec focal_point{0.f, 0.f, FOCAL_DIST};
+  PerspectiveRayGenerator rayGenerator{ screen, focal_point };
   Scene scene;
   auto shapes = scene.getFrame();
   unsigned int* img = new unsigned int[RESX * RESY];
@@ -21,7 +23,7 @@ int main() {
       if (RESY - row - 1 == 200 && col == 150) {
         int blah = 0;
       }
-      RayTracer tracer{ ray };
+      const RayTracer tracer{ ray };
       img[RESX*(RESY - row - 1) + col] = tracer.trace(shapes);
     }
   }
