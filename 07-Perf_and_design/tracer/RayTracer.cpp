@@ -1,5 +1,15 @@
 #include "RayTracer.h"
 
+float myPow(float val, int exp) {
+  int curexp = 1;
+  float curval = val;
+  while (curexp < exp) {
+    curval *= curval;
+    curexp *= 2;
+  }
+  return curval;
+}
+
 Color RayTracer::trace(const std::vector<std::unique_ptr<Shape>>& shapes) const {
   return trace(shapes, primary_ray, 0, nullptr);
 }
@@ -45,7 +55,9 @@ Color RayTracer::trace(const std::vector<std::unique_ptr<Shape>>& shapes, const 
         vec lightDir = secondary_shape->pos - nearestReflection->reflection.pos;
         lightDir.normalize();
         float diffuse_light_intensity = std::max(0.f, nearestReflection->norm.dot(lightDir)) * secondary_shape->properties.intensity;
-        float specular_light_intensity = std::powf(std::max(0.f, (-reflect(-lightDir, nearestReflection->norm)).dot(primary_ray.dir)), pNearestShape->properties.specular_exp) * secondary_shape->properties.intensity;
+        const auto r = -reflect(-lightDir, nearestReflection->norm);
+        const auto rdotprim = std::max(0.f, r.dot(primary_ray.dir));
+        float specular_light_intensity = myPow(rdotprim, pNearestShape->properties.specular_exp) * secondary_shape->properties.intensity;
         final_color += pNearestShape->properties.color * pNearestShape->properties.diffuse_factor * diffuse_light_intensity +
           secondary_shape->properties.color * pNearestShape->properties.specular_factor * specular_light_intensity;
       }

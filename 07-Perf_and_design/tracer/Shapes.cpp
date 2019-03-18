@@ -46,7 +46,8 @@ std::optional<ReflectionData> barycentric_intersects(const vec & pos1, const vec
   auto norm_inv = AmB.cross(AmC);
   const float incident_dot_norm = incident_ray.dir.dot(norm_inv);
   // intersection if barycentric coordinates between 0 and 1, t is positive, and surface is facing the ray
-  if(!func(beta, gamma) || t < 0.f || incident_dot_norm < 0.f) {
+  //if(!func(beta, gamma) || t < 0.f || incident_dot_norm < 0.f) {
+  if(!(beta >= 0.f && gamma >= 0.f && beta <= 1.f && gamma <= 1.f) || t < 0.f || incident_dot_norm < 0.f) {
     return std::nullopt;
   }
   const auto hitPoint = incident_ray.pos + incident_ray.dir * t;
