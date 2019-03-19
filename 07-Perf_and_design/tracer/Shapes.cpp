@@ -27,13 +27,18 @@ std::optional<ReflectionData> intersects(const Sphere& sphere, const Ray& incide
 }
 
 
-std::optional<ReflectionData> barycentric_intersects(const vec & pos1, const vec& pos2, const vec& pos3, const Ray & incident_ray, std::function<bool(float, float)> func)
+std::optional<ReflectionData> barycentric_intersects(const vec & pos1, const vec& p2mp1, const vec& p3mp1, const vec& norm, const Ray & incident_ray, std::function<bool(float, float)> func)
 {
   // use Cramers rule to solve for barycentric coordinates (alpha and gamma) and t in this equation
   // incident_ray.pos + incident_ray.dir * t = pos1 + alpha * (pos2 - pos1) + gamma * (pos3 - pos1);
-  const auto AmC = pos1 - pos2;
-  const auto AmB = pos1 - pos3;
-  const auto dir = incident_ray.dir;
+  const auto& AmC = p2mp1;
+  const auto& AmB = p3mp1;
+  const auto& dir = incident_ray.dir;
+  const float incident_dot_norm = -dir.dot(norm);
+  // early abort if surface is facing away from the ray
+  if (incident_dot_norm < 0.f) {
+    return std::nullopt;
+  }
   const auto AmP = pos1 - incident_ray.pos;
   // Determinates...  I really need to use a matrix class that has a det method`
   const float detA = AmB.x * (AmC.y*dir.z - dir.y*AmC.z) + AmC.x * (dir.y*AmB.z - AmB.y*dir.z) + dir.x * (AmB.y*AmC.z - AmC.y*AmB.z);
@@ -43,30 +48,25 @@ std::optional<ReflectionData> barycentric_intersects(const vec & pos1, const vec
   const float beta = betDet / detA;
   const float gamma = gamDet / detA;
   const float t = tDet / detA;
-  auto norm_inv = AmB.cross(AmC);
-  const float incident_dot_norm = incident_ray.dir.dot(norm_inv);
-  // intersection if barycentric coordinates between 0 and 1, t is positive, and surface is facing the ray
-  //if(!func(beta, gamma) || t < 0.f || incident_dot_norm < 0.f) {
-  if(!(beta >= 0.f && gamma >= 0.f && beta <= 1.f && gamma <= 1.f) || t < 0.f || incident_dot_norm < 0.f) {
+  // intersection if barycentric coordinates between 0 and 1, and t is positive
+  if(!func(beta, gamma) || t < 0.f) {
     return std::nullopt;
   }
   const auto hitPoint = incident_ray.pos + incident_ray.dir * t;
-  norm_inv.normalize();
-  const auto norm = -norm_inv;
   auto reflection = reflect(incident_ray.dir, norm);
   return std::make_optional(ReflectionData(Ray(hitPoint, reflection), norm));
 }
 
 std::optional<ReflectionData> intersects(const Triangle & triangle, const Ray & incident_ray)
 {
-  return barycentric_intersects(triangle.pos, triangle.pos2, triangle.pos3, incident_ray, [](float beta, float gamma) {
+  return barycentric_intersects(triangle.pos, triangle.p2mp1, triangle.p3mp1, triangle.norm, incident_ray, [](float beta, float gamma) {
     return beta >= 0.f && gamma >= 0.f && beta + gamma <= 1.f;
   });
 }
 
 std::optional<ReflectionData> intersects(const Rect & rect, const Ray & incident_ray)
 {
-  return barycentric_intersects(rect.pos, rect.pos2, rect.pos3, incident_ray, [](float beta, float gamma) {
+  return barycentric_intersects(rect.pos, rect.p2mp1, rect.p3mp1, rect.norm, incident_ray, [](float beta, float gamma) {
     return beta >= 0.f && gamma >= 0.f && beta <= 1.f && gamma <= 1.f;
   });
 }

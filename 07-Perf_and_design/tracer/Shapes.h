@@ -32,21 +32,37 @@ struct Sphere : public Shape {
 struct Triangle : public Shape {
   vec pos2;
   vec pos3;
+  vec p2mp1;
+  vec p3mp1;
+  vec norm;
   Triangle(const vec& t_pos, const vec& t_pos2, const vec& t_pos3, const SurfaceProperties& t_properties) : 
     Shape{ t_pos, t_properties }, 
     pos2{ t_pos2 }, 
-    pos3{ t_pos3 }
-  {}
+    pos3{ t_pos3 },
+    p2mp1{ pos - pos2 },
+    p3mp1{ pos - pos3 },
+    norm{ -p3mp1.cross(p2mp1) }
+  {
+    norm.normalize();
+  }
   std::optional<ReflectionData> intersects_with(const Ray& ray) const override; 
 };
 struct Rect : public Shape {
   vec pos2;
   vec pos3;
+  vec p2mp1;
+  vec p3mp1;
+  vec norm;
   Rect(const vec& t_pos, const vec& t_pos2, const vec& t_pos3, const SurfaceProperties& t_properties) : 
     Shape{ t_pos, t_properties }, 
     pos2{ t_pos2 }, 
-    pos3{ t_pos3 }
-  {}
+    pos3{ t_pos3 },
+    p2mp1{ pos - pos2 },
+    p3mp1{ pos - pos3 },
+    norm{ -p3mp1.cross(p2mp1) }
+  { 
+    norm.normalize();
+  }
   std::optional<ReflectionData> intersects_with(const Ray& ray) const override; 
 };
 

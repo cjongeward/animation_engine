@@ -51,7 +51,7 @@ Color RayTracer::trace(const std::vector<std::unique_ptr<Shape>>& shapes, const 
     Color reflected_color = trace(shapes, nearestReflection->reflection, depth + 1, pNearestShape);
     final_color += reflected_color * pNearestShape->properties.reflect_factor;
     for (auto& secondary_shape : shapes) {
-      if (secondary_shape.get() != pNearestShape) {
+      if (secondary_shape.get() != pNearestShape && secondary_shape->properties.intensity > 0.0f) {
         vec lightDir = secondary_shape->pos - nearestReflection->reflection.pos;
         lightDir.normalize();
         float diffuse_light_intensity = std::max(0.f, nearestReflection->norm.dot(lightDir)) * secondary_shape->properties.intensity;
