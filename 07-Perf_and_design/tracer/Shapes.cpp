@@ -45,9 +45,10 @@ std::optional<ReflectionData> barycentric_intersects(const vec & pos1, const vec
   const float tDet = AmB.x * (AmC.y*AmP.z - AmP.y*AmC.z) + AmC.x * (AmP.y*AmB.z - AmB.y*AmP.z) + AmP.x * (AmB.y*AmC.z - AmC.y*AmB.z);
   const float gamDet = AmB.x * (AmP.y*dir.z - dir.y*AmP.z) + AmP.x * (dir.y*AmB.z - AmB.y*dir.z) + dir.x * (AmB.y*AmP.z - AmP.y*AmB.z);
   const float betDet = AmP.x * (AmC.y*dir.z - dir.y*AmC.z) + AmC.x * (dir.y*AmP.z - AmP.y*dir.z) + dir.x * (AmP.y*AmC.z - AmC.y*AmP.z);
-  const float beta = betDet / detA;
-  const float gamma = gamDet / detA;
-  const float t = tDet / detA;
+  const float overDetA = 1.0f / detA;
+  const float beta = betDet * overDetA;
+  const float gamma = gamDet * overDetA;
+  const float t = tDet * overDetA;
   // intersection if barycentric coordinates between 0 and 1, and t is positive
   if(!func(beta, gamma) || t < 0.f) {
     return std::nullopt;
