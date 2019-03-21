@@ -83,5 +83,5 @@ Color RayTracer::trace(const std::vector<Sphere>& shapes, const Ray& incidentRay
 
 * so everything seems to be working fine until I put one sphere behind another. Depending on what order I add them to the std::vector, the one in the back may be drawn on top of the one in front. I need to add something to my trace() method that makes sure rays collide with only the nearest object. This involves splitting the trace() method into two sections. 
 
-In the first section, we loop through every shape in the scene....  keep typing stuff.... blah blah blahh
+In the first section, we loop through every shape in the scene and keep track of the nearest hit point. Then we use that shape for color data and to calculate the next reflected ray. I’ll need to build on this later on when I do shadows and want to detect if a light source is blocked by another object. 
 
