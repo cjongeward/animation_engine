@@ -3,8 +3,8 @@
 #include "Shapes.h"
 
 
-std::optional<ReflectionData> intersects(const Sphere& sphere, const Ray& incident_ray) {
-  auto v_ray2sph_center = sphere.pos - incident_ray.pos;
+std::optional<ReflectionData> Sphere::intersects_with(const Ray& incident_ray) const {
+  auto v_ray2sph_center = pos - incident_ray.pos;
   auto v_r2s_proj_ray = v_ray2sph_center.dot(incident_ray.dir); // projection of ray_origin_to_sphere onto ray
   if (v_r2s_proj_ray < 0.f) {  // if sphere is behind ray origin
     return std::nullopt;
@@ -12,7 +12,7 @@ std::optional<ReflectionData> intersects(const Sphere& sphere, const Ray& incide
   auto v_ray2sph_bis = incident_ray.dir * v_r2s_proj_ray; // vector from ray origin to midway through the sphere along the ray
   auto v_min_dist = v_ray2sph_bis - v_ray2sph_center; // vector from sphere center to closest point on the ray 
   float d2 = v_min_dist.mag2();
-  float r2 = sphere.radius*sphere.radius; 
+  float r2 = radius*radius; 
   if (d2 > r2) { // if min distance between ray and sphere is greater than radius, then no intersection
     return std::nullopt;
   }
@@ -20,15 +20,14 @@ std::optional<ReflectionData> intersects(const Sphere& sphere, const Ray& incide
   float ratio = 1.f - std::sqrtf(cd2) / v_ray2sph_bis.mag(); // the remaining portion of v_ray2sph_bis leads to the surface of the sphere
   auto v_ray2sph_surface = v_ray2sph_bis * ratio;
   auto p_sphere_surface = incident_ray.pos + v_ray2sph_surface; 
-  auto v_norm = p_sphere_surface - sphere.pos;
+  auto v_norm = p_sphere_surface - pos;
   v_norm.normalize();
   auto v_reflection = reflect(incident_ray.dir, v_norm);
   return std::make_optional(ReflectionData(Ray(p_sphere_surface, v_reflection), v_norm));
 }
 
-
-std::optional<ReflectionData> barycentric_intersects(const vec & pos1, const vec& p2mp1, const vec& p3mp1, const vec& norm, const Ray & incident_ray, std::function<bool(float, float)> func)
-{
+template <class FUNC>
+std::optional<ReflectionData> barycentric_intersects(const vec & pos1, const vec& p2mp1, const vec& p3mp1, const vec& norm, const Ray & incident_ray, FUNC func) {
   // use Cramers rule to solve for barycentric coordinates (alpha and gamma) and t in this equation
   // incident_ray.pos + incident_ray.dir * t = pos1 + alpha * (pos2 - pos1) + gamma * (pos3 - pos1);
   const auto& AmC = p2mp1;
@@ -58,31 +57,15 @@ std::optional<ReflectionData> barycentric_intersects(const vec & pos1, const vec
   return std::make_optional(ReflectionData(Ray(hitPoint, reflection), norm));
 }
 
-std::optional<ReflectionData> intersects(const Triangle & triangle, const Ray & incident_ray)
-{
-  return barycentric_intersects(triangle.pos, triangle.p2mp1, triangle.p3mp1, triangle.norm, incident_ray, [](float beta, float gamma) {
+std::optional<ReflectionData> Triangle::intersects_with(const Ray & incident_ray) const {
+  return barycentric_intersects(pos, p2mp1, p3mp1, norm, incident_ray, [](float beta, float gamma) {
     return beta >= 0.f && gamma >= 0.f && beta + gamma <= 1.f;
   });
 }
 
-std::optional<ReflectionData> intersects(const Rect & rect, const Ray & incident_ray)
-{
-  return barycentric_intersects(rect.pos, rect.p2mp1, rect.p3mp1, rect.norm, incident_ray, [](float beta, float gamma) {
+std::optional<ReflectionData> Rect::intersects_with(const Ray & incident_ray) const {
+  return barycentric_intersects(pos, p2mp1, p3mp1, norm, incident_ray, [](float beta, float gamma) {
     return beta >= 0.f && gamma >= 0.f && beta <= 1.f && gamma <= 1.f;
   });
 }
 
-std::optional<ReflectionData> Sphere::intersects_with(const Ray & ray) const
-{
-  return intersects(*this, ray); 
-}
-
-std::optional<ReflectionData> Triangle::intersects_with(const Ray & ray) const
-{
-  return intersects(*this, ray); 
-}
-
-std::optional<ReflectionData> Rect::intersects_with(const Ray & ray) const
-{
-  return intersects(*this, ray); 
-}

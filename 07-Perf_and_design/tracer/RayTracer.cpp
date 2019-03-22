@@ -22,8 +22,8 @@ Color RayTracer::trace(const std::vector<std::unique_ptr<Shape>>& shapes, const 
   // find the nearest hit point
   const Shape* pNearestShape = nullptr;
   std::optional<ReflectionData> nearestReflection = std::nullopt;
-  for (const auto& shape_ref : shapes) {
-    Shape* pShape = shape_ref.get();
+  for (const auto& shape_up : shapes) {
+    Shape* pShape = shape_up.get();
     Shape& shape = *pShape;
     if (&shape != curShape) {
       auto reflected = shape.intersects_with(incidentRay);

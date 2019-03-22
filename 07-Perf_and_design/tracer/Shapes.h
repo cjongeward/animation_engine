@@ -27,7 +27,7 @@ struct Shape {
 struct Sphere : public Shape {
   float radius;
   Sphere(const vec& t_pos, const SurfaceProperties& t_properties, float t_radius) : Shape{ t_pos, t_properties }, radius{ t_radius } {}
-  std::optional<ReflectionData> intersects_with(const Ray& ray) const override; 
+  std::optional<ReflectionData> intersects_with(const Ray& ray) const override;
 };
 struct Triangle : public Shape {
   vec pos2;
@@ -45,7 +45,7 @@ struct Triangle : public Shape {
   {
     norm.normalize();
   }
-  std::optional<ReflectionData> intersects_with(const Ray& ray) const override; 
+  std::optional<ReflectionData> intersects_with(const Ray& ray) const override;
 };
 struct Rect : public Shape {
   vec pos2;
@@ -63,7 +63,7 @@ struct Rect : public Shape {
   { 
     norm.normalize();
   }
-  std::optional<ReflectionData> intersects_with(const Ray& ray) const override; 
+  std::optional<ReflectionData> intersects_with(const Ray& ray) const override;
 };
 
 // This should probably go somewhere else
@@ -74,10 +74,6 @@ struct Screen {
   Screen(const vec& t_pos, float t_sizex, float t_sizey) : pos{ t_pos }, sizex{ t_sizex }, sizey{ t_sizey }{}
 };
 
-
-std::optional<ReflectionData> intersects(const Sphere& sphere, const Ray& incident_ray);
-std::optional<ReflectionData> intersects(const Triangle& triangle, const Ray& incident_ray);
-std::optional<ReflectionData> intersects(const Rect& rect, const Ray& incident_ray);
 
 
 #endif
