@@ -4,11 +4,9 @@
 ## Description:
 Ok, so this one took me a minute to wrap my mind around. Up until now, I haven’t really been ray tracing. Yes, I generate a ray and shoot it into the scene, but that’s where it ends.  Once the ray finds a hit point, the “tracing” ends and we switch to object-based shading. We loop through each object in the scene, determine if it’s a light source, then run it through the diffuse and specular equations; no more tracing involved. 
 
-But these equations are really just approximations of what actually should happen. Before I learned about these equations, I had this idea that I could implement diffuse and specular shading and everything in between all at once. Before I go into that though, let me define a full raytracer. 
+But these equations are only approximations of how light behaves in real life.  A realistic ray tracer starts with the primary ray originating at the pixel and going out into the scene. If it collides with a surface, it reflects off the surface generating a secondary ray. If the secondary ray collides with a surface, it reflects and generates another secondary ray, and so forth and so on. This continues until there is no collision or until we’ve reached the maximum number of secondary rays. Then, the color data from each of the surfaces is combined to calculate the final color of the pixel. This can generate a very nice mirror reflection kind of like the specular equation with a really large specular exponent.  
 
-The full ray tracer starts with the primary ray originating at the pixel and going out into the scene. If it collides with a surface, it reflects off the surface generating a secondary ray. If the secondary ray collides with a surface, it reflects and generates another secondary ray, and so forth and so on. This continues until there is no collision or until we’ve reached the maximum number of secondary rays. Then, the color data from each of the surfaces is combined to calculate the final color of the pixel. This generates a very nice mirror reflection just like the specular equation without the specular exponent.  
-
-So how can we use raytracing to generate something other than a perfect mirror reflection?  We can’t apply a specular exponent in this case. My idea was to shoot multiple rays for each pixel, randomly distort the norm of the surface for each ray, then average all the rays together to color the pixel. More distortion would result in a more diffuse surface. Maybe I’ll try this approach later, but I suspect I would need hundreds of rays per pixel to make this work and that sounds SLOOOOW. 
+If the surface is smooth (and they all are so far), we will get a true mirror reflection from this method. If we make the surface jagged, we can just let the ray tracer do it’s thing and observe the not-so-mirrory result. But making the surface jagged involves manipulating the shape’s surface or at least the norm. We could also try shooting multiple identical rays and randomly distort the norm but I suspect I would need hundreds of rays per pixel to make this work and that sounds SLOOOOW. I’ll try at least one of these techniques later. 
 
 So, back to mirror reflection. In this project, I will implement mirror-like reflection using actual ray tracing and I will combine it with the existing ambient, diffuse, and specular components. So now I will have four components to add into the final color. 
 
@@ -17,12 +15,15 @@ Since this is not the object-based rendering approach I’ve used previously, I 
 ## Goals:
 * Create a sphere that reflects its surroundings
 * Create a class to store reflection properties
+for each individual sphere. 
+* Create multiple spheres with different surfaces. 
+
 
 ## Result:
 ![](/04-Reflection/tracer/image.bmp)
 
 ## Implementation:
-* The first thing I want to do is create a ReflectionProperties class. At the moment, I have the diffuse and specular multipliers and the specular exponent hard coded into the trace method. I’m about to add another shading component that will have yet another multiplier so it’s about time to consolidate these multipliers into a class. Plus, each shape in the scene needs to be able to specify its own multipliers. This combined with a color (or later on a texture) is what will define what type of material the surface looks like. So the ReflectionProperties class will hold the multipliers, the specular exponent, and the color. 
+* The first thing I did was create a ReflectionProperties class. Previously, I had the diffuse and specular multipliers and the specular exponent hard coded into the trace method. I’m about to add another shading component that will have yet another multiplier so it’s about time to consolidate these multipliers into a class. Plus, each shape in the scene needs to be able to specify its own multipliers. This combined with a color (or later on a texture) is what will define what type of material the surface looks like. So the ReflectionProperties class will hold the multipliers, the specular exponent, and the color. 
 
 A reflection properties instance will be constructed with four coefficients and a color. Each shape will need to be constructed with a ReflectionProperties instance that will define what it looks like. 
 ```cpp
