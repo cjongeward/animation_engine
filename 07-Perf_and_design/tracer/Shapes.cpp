@@ -30,8 +30,6 @@ template <class FUNC>
 std::optional<ReflectionData> barycentric_intersects(const vec & pos1, const vec& p2mp1, const vec& p3mp1, const vec& norm, const Ray & incident_ray, FUNC func) {
   // use Cramers rule to solve for barycentric coordinates (alpha and gamma) and t in this equation
   // incident_ray.pos + incident_ray.dir * t = pos1 + alpha * (pos2 - pos1) + gamma * (pos3 - pos1);
-  const auto& AmC = p2mp1;
-  const auto& AmB = p3mp1;
   const auto& dir = incident_ray.dir;
   const float incident_dot_norm = -dir.dot(norm);
   // early abort if surface is facing away from the ray
@@ -40,16 +38,16 @@ std::optional<ReflectionData> barycentric_intersects(const vec & pos1, const vec
   }
   const auto AmP = pos1 - incident_ray.pos;
   // Determinates...  I really need to use a matrix class that has a det method`
-  const float detA = AmB.x * (AmC.y*dir.z - dir.y*AmC.z) + AmC.x * (dir.y*AmB.z - AmB.y*dir.z) + dir.x * (AmB.y*AmC.z - AmC.y*AmB.z);
-  const float tDet = AmB.x * (AmC.y*AmP.z - AmP.y*AmC.z) + AmC.x * (AmP.y*AmB.z - AmB.y*AmP.z) + AmP.x * (AmB.y*AmC.z - AmC.y*AmB.z);
-  const float gamDet = AmB.x * (AmP.y*dir.z - dir.y*AmP.z) + AmP.x * (dir.y*AmB.z - AmB.y*dir.z) + dir.x * (AmB.y*AmP.z - AmP.y*AmB.z);
-  const float betDet = AmP.x * (AmC.y*dir.z - dir.y*AmC.z) + AmC.x * (dir.y*AmP.z - AmP.y*dir.z) + dir.x * (AmP.y*AmC.z - AmC.y*AmP.z);
+  const float detA = p3mp1.x * (p2mp1.y*dir.z - dir.y*p2mp1.z) + p2mp1.x * (dir.y*p3mp1.z - p3mp1.y*dir.z) + dir.x * (p3mp1.y*p2mp1.z - p2mp1.y*p3mp1.z);
+  const float tDet = p3mp1.x * (p2mp1.y*AmP.z - AmP.y*p2mp1.z) + p2mp1.x * (AmP.y*p3mp1.z - p3mp1.y*AmP.z) + AmP.x * (p3mp1.y*p2mp1.z - p2mp1.y*p3mp1.z);
+  const float gamDet = p3mp1.x * (AmP.y*dir.z - dir.y*AmP.z) + AmP.x * (dir.y*p3mp1.z - p3mp1.y*dir.z) + dir.x * (p3mp1.y*AmP.z - AmP.y*p3mp1.z);
+  const float betDet = AmP.x * (p2mp1.y*dir.z - dir.y*p2mp1.z) + p2mp1.x * (dir.y*AmP.z - AmP.y*dir.z) + dir.x * (AmP.y*p2mp1.z - p2mp1.y*AmP.z);
   const float overDetA = 1.0f / detA;
   const float beta = betDet * overDetA;
   const float gamma = gamDet * overDetA;
   const float t = tDet * overDetA;
   // intersection if barycentric coordinates between 0 and 1, and t is positive
-  if(!func(beta, gamma) || t < 0.f) {
+  if(t < 0.f || !func(beta, gamma)) {
     return std::nullopt;
   }
   const auto hitPoint = incident_ray.pos + incident_ray.dir * t;
