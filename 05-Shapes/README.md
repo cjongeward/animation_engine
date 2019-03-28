@@ -29,6 +29,20 @@ Now, I want to be able to call Ray.intersects_with(Shape) and I want to implemen
 
 Second, I’ve designed the intersects() method to return a std::optional containing a reflection data packet that includes the reflected Ray. If I add an intersects method to the Ray class, it will have a dependency on the ReflectionData class. But the ReflectionData class has a dependency on the Ray class. So that sucks. I’ll need to rethink this all at some point. For now, I’ll just bite the bullet and call myShape.intersects(myRay). 
 ```cpp
+auto reflected = shape.intersects_with(incidentRay);
+```
+```cpp
+std::optional<ReflectionData> Triangle::intersects_with(const Ray & ray) const
+{
+  return intersects(*this, ray); 
+}
+```
+```cpp
+struct ReflectionData {
+  Ray reflection;
+  vec norm;
+  ReflectionData(const Ray& t_reflection, const vec& t_norm) : reflection{ t_reflection }, norm{ t_norm }{}
+};
 ```
 
 * Now to make some more shapes. I’ll start by creating a Triangle class. I define a triangle with three points. My reflection function will flip the norm if it’s facing the wrong direction so the order of the points doesn’t matter. 
@@ -47,9 +61,8 @@ Since 97% of the intersects() function is identical, I created a free function c
 * Lastly, I created a Scene Class. Now I can move the creation of the std::vector of shapes into its own class. The factory method is called getFrame(). The motivation behind this name is that it will eventually be used to build each sequential frame in an animation, but that won’t be for a while. Until then, I’m just using it as a place to assemble my scene. 
 
 ## Lessons Learned:
-* t must be > 0
-* collisions are ugly
-* my improvised collision is somehow making my triangles translucent.  How the fuck is the mirror showing up in the purple triangle?!  While I was working on the next project, I noticed the norm for the triangles and spheres was pointing in the wrong direction. This was causing the shapes to be illuminated incorrectly. Notice the cube in the image is darker on the left even though the light source is on the left. Oops…
-* no shadows
-* gonna need a matrix soon
+* In parametric equations involving rays, don’t forget that T can’t be negative. If you forget the limit T to positive values, you see reflections where there shouldn’t be. 
+* There’s no getting around it, the collision functions are ugly. If I abstract away some of the ugliness, then they’re slow. These functions execute frequently so any wasteful operations slow down the program noticeably. 
+* I can’t tell what is going on with the big white circle on the purple triangle. It looks like it’s reflecting the light source. Edit: as I was working on project 6, I noticed the norm for the purple triangle was pointing away from the camera so the reflection from the backside was being drawn on the front side.  This was also causing the cube to appear as if it is illuminated from the right even though the light sources are on the left. Good to know. 
+* This is not do much a lesson learned, but more a note: The speculation reflection on the mirror is showing both light sources even though one of them should be blocked. I’ll deal with that when I do shadows. 
 

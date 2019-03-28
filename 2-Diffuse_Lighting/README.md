@@ -3,23 +3,27 @@
 
 
 ## Description:
-The last exercise gave me a bright red circle. I know that it’s really a red sphere floating 4 units away from the camera, but everyone else just thinks it’s a red circle. I need to add some lighting to the scene and shading to the sphere so that it actually looks like a sphere.
+The last exercise gave me a bright red circle. I know that it’s really a red sphere floating in virtual space 4 units away from the camera, but everyone else just thinks it’s a red circle. I need to add some lighting to the scene and shading to the sphere so that it actually looks like a sphere.
 
-I will apply three different types of lighting over the next two projects, ambient lighting, diffuse lighting, and specular lighting. 
-* ambient lighting is used to illuminate a surface that is not exposed to any direct lighting. In the real world, light repeatedly bounces off surfaces and molecules in the atmosphere and whatnot to indirectly illuminate surfaces. I will approximate that lighting by simply illuminating every surface in the scene with a low level of light. There are techniques to make ambient lighting more realistic and I’ll expand on this later. 
-* Diffuse shading and specular shading both describe how light reflects from a surface, but they represent opposite ends of the shininess spectrum.  So any light reflecting from a surface lies somewhere between fully diffuse and fully specular. Fully diffuse reflection means the light is reflected evenly in every direction in the hemisphere of the incident light. This creates a color that appears flat and chalky. Fully specular reflection means that the light source will reflect off the surface in one direction. This would create the appearance of a mirror. I’ll implement fully diffuse reflection in this project and then add a specular component in the next project. 
+I will apply three different types of shading to the sphere over the next two projects, ambient, diffuse, and specular. 
+* ambient lighting is used to illuminate a surface that is not exposed to any direct light. In the real world, a beam of light repeatedly bounces off surfaces and particles in the atmosphere and whatnot to indirectly illuminate other surfaces. Ambient lighting approximates this by simply illuminating every surface in the scene with a constant low level of light. There are techniques to make ambient lighting more realistic and I’ll expand on these later. 
+* Diffuse shading and specular shading both describe how light reflects from a surface, but they represent opposite ends of the shininess spectrum.  Any light reflecting from a surface lies somewhere between fully diffuse and fully specular. Fully diffuse reflection means the light is reflected evenly in every direction in the hemisphere of the surface norm. This creates a color that appears flat and chalky. Fully specular reflection means that the light source will reflect off the surface in one direction. This would create the appearance of a mirror. I’ll implement fully diffuse reflection in this project and then add a specular component in the next project. 
 ![](napkins/diffuse.jpg)
 
 ## Goals:
-* apply ambient lighting to the entire sphere. 
-* light the sphere from the side and apply a diffuse shading equation.
+* Apply ambient lighting to the entire sphere. 
+* Light the sphere from the side and apply a diffuse shading equation.
 
 ## Result:
 ![](/2-Diffuse_Lighting/tracer/image.bmp)
 
 ## Implementation:
-* Move the vector class into its own file. I should probably consider using an existing vector implementation like GLM, but for now I’ll keep using my own until it gets too annoying and tedious. I added all the required operators plus the basic vector operations like cross product, normalize, etc. 
-* Make a Color class. In the previous project, I represented color with a plane unsigned int. Now I will make a color class the uses the 3D vector to store RGB data. Each value should stay between 0 and 1 so I need to add a method to clamp the values outside that range. For now I will just limit the color values with min and max. This creates a weird looking shading when the color becomes saturated (greater than one).  There are other methods for clamping that make the image look more realistic. I will apply them in a future project. I also supply an implicit conversion operator to convert the color to an unsigned int. This comes in handy when we assign the color to the image buffer. 
+* Move the 3D vector class into its own file: I should probably consider using an existing vector implementation like GLM, but for now I’ll keep using my own until it gets too annoying and tedious. I added all the required operators and the basic vector operations like cross product, normalize, etc. 
+* Make a Color class: In the previous project, I represented color with an unsigned int which is required by the bitmap generator.  Now I will make a Color class that uses the 3D vector to store RGB data. It supports addition and multiplication operators so I can combine and scale colors. 
+
+Each individual value in the color should stay between 0 and 1 so I added a method to clamp the values if they go outside that range. For now, it’s pretty simple. I just limit the color values with min and max. This creates a weird effect when the color becomes saturated. There are other methods for clamping that make the image look more realistic. I will apply them in a future project. 
+
+I also wrote an implicit conversion operator to convert the color to an unsigned int. This comes in handy when we assign the color to the image buffer since it expects an unsigned int. 
 ```cpp
 class Color {
   vec color_vec;
@@ -40,9 +44,11 @@ public:
   }
 }
 ```
-* Move the sphere into a container.  I will eventually want to render more than one shape so I will need a polymorphic shape type and a container to hold them. For now, I will move the sphere into a std::vector and change the tracer code to iterate the std::vector. 
-* Apply ambient lighting. To do this, I set a global const float to the ambient light intensity.  The entire surface of the sphere will be rendered as it’s color (red) multiplied by the ambient light intensity. 
-* Apply diffuse lighting. But first I need to create a light source. For now, I will hardcode a point light to the left and behind the camera.  The intensity of the diffuse illumination on the surface of the sphere is proportional to the cosine of the surface norm and a vector pointing to the light source. This means the side of the sphere that is facing the light will receive maximum illumination and the sides of the sphere roughly 90 degrees and beyond will only receive ambient light. This is achieved by changing the intersects() function to return the norm and the reflected ray from the surface. We calculate the diffuse light intensity by taking the dot product of the norm and the normalized vector pointing to the light source. 
+* Move the sphere into a container: I will eventually want to render more than one sphere, and probably other shapes too, so I need a container to put them in. For now, I will put the sphere into a std::vector and change the tracer code to iterate through all the spheres in the std::vector. 
+* Apply ambient lighting: I start with a float to set the desired ambient light intensity.  I made it a global float that will live with the other settings. The entire surface of the sphere is painted a dim shade of red the intensity of which is driven by the ambient light intensity variable.  
+* Apply diffuse lighting:  First I need to create a light source. For now, I will hardcode a light source at a point to the left and behind the camera.  The intensity of the diffuse illumination on the surface of the sphere is proportional to the cosine of the surface norm and a vector pointing to the light source, so I’ll calculate it using the dot product. This means the side of the sphere that is facing the light will receive maximum illumination and the edges of the sphere roughly 90 degrees and beyond will only receive ambient light. 
+
+Now I need my intersects() function to return more info than just a Boolean. At very least, I need to know if the ray collides with the sphere, where it hits the sphere (the hit point), and the norm at the surface so I can calculate the diffuse light intensity. In the next project when I do specular shading, I’ll also need to know the reflected ray. So I am returning a std::optional from the intersects() function.  If there is no collision, the std::optional is empty. If there is a collision, the std::optional will contain a ReflectionData packet that contains the norm and the reflected ray. Everything I need to trace some rays.
 ```cpp
  unsigned int* img = new unsigned int[RESX * RESY];
   for (int row = 0; row < RESY; ++row) {
@@ -62,8 +68,6 @@ public:
     }
   }
 ```
-* The intersects() function modified to return a std::optional contain the norm and reflected ray at the intersection point. It returns nullopt if there is no intersection. 
-![](napkins/rs-intersect2.jpg)
 ```cpp
 std::optional<ReflectionData> intersects(Sphere s, Ray incident) {
   auto v_ray2sph_center = s.pos - incident.pos;
@@ -88,3 +92,4 @@ std::optional<ReflectionData> intersects(Sphere s, Ray incident) {
   return std::make_optional(ReflectionData(Ray(p_sphere_surface, v_reflection), v_norm));
 }
 ```
+
