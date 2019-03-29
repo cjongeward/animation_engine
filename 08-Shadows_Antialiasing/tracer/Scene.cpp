@@ -26,7 +26,7 @@ std::vector<std::unique_ptr<Shape>> Scene::getFrame()
   Rect wall3{ vec{10.f, -4.f, -20.f}, vec{10.f, 4.f, -20.f}, vec{-10.f, -4.f, -20.f}, YELLOWISH };
   Rect wall4{ vec{-10.f, -4.f, 0.1f}, vec{-10.f, 4.f, 0.1f}, vec{10.f, -4.f, 0.1f}, YELLOWISH };
   Rect cieling{ vec{-10.f, 4.f, -20.f}, vec{10.f, 4.f, -20.f}, vec{-10.f, 4.f, 0.1f}, WHITEISH };
-  Rect mirror{ vec{3.f, -2.5f, -19.9f}, vec{3.f, 2.5f, -19.9f}, vec{-3.f, -2.5f, -19.9f}, MIRRORISH };
+  Rect mirror{ vec{4.f, -3.f, -19.9f}, vec{4.f, 3.f, -19.9f}, vec{-4.f, -3.f, -19.9f}, MIRRORISH };
   std::vector<std::unique_ptr<Shape>> shapes;
   shapes.push_back(std::make_unique<Sphere>(sphere));
   shapes.push_back(std::make_unique<Sphere>(sphere2));
