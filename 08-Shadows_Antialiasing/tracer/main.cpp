@@ -25,13 +25,19 @@ int main() {
   auto start_time = std::chrono::high_resolution_clock::now();
   for (int row = 0; row < RESY; ++row) {
     for (int col = 0; col < RESX; ++col) {
-      Ray ray = rayGenerator.MakeRay(row, col);
+      std::vector<Ray> rays = rayGenerator.MakeRay(row, col);
       // for debugging
       if (RESY - row - 1 == 200 && col == 150) {
         int blah = 0;
       }
-      const RayTracer tracer{ ray };
-      img[RESX*(RESY - row - 1) + col] = tracer.trace(shapes);
+      // get average color for all rays in the pixel
+      Color final_color = BLACK;
+      for (auto& ray : rays) {
+        const RayTracer tracer{ ray };
+        final_color += tracer.trace(shapes);
+      }
+      final_color *= 1.f / rays.size();
+      img[RESX*(RESY - row - 1) + col] = final_color;
     }
   }
   auto elapsed_time = std::chrono::high_resolution_clock::now() - start_time;

@@ -37,6 +37,22 @@ auto findNearestHitPoint(const std::vector<std::unique_ptr<Shape>>& shapes, cons
   return std::make_pair(pNearestShape, nearestReflection);
 }
 
+bool isLightSourceBlocked(const std::vector<std::unique_ptr<Shape>>& shapes, const Ray& incidentRay, Shape* pIgnoreShape, float dist2) {
+  for (const auto& shape_up2 : shapes) {
+    if (shape_up2.get() != pIgnoreShape) {
+      Shape* pShape2 = shape_up2.get();
+      if (auto ref = pShape2->intersects_with(incidentRay); ref.has_value()) {
+        vec shapeDir = ref->reflection.pos - incidentRay.pos;
+        float shapeDirMag2 = shapeDir.mag2();
+        if (shapeDirMag2 < dist2) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+
 Color RayTracer::trace(const std::vector<std::unique_ptr<Shape>>& shapes, const Ray& incidentRay, int depth, const Shape* curShape) const {
   if (depth >= max_depth) { // recursive base case
     return BLACK;
@@ -55,35 +71,21 @@ Color RayTracer::trace(const std::vector<std::unique_ptr<Shape>>& shapes, const 
     Color reflected_color = trace(shapes, nearestReflection->reflection, depth + 1, pNearestShape);
     final_color += reflected_color * pNearestShape->properties.reflect_factor;
 
-    for (auto& secondary_shape : shapes) {
-      if (secondary_shape.get() != pNearestShape && secondary_shape->properties.intensity > 0.0f) {
-        vec lightDir = secondary_shape->pos - nearestReflection->reflection.pos;
+    // scan light sources to calculate diffuse and specular components
+    for (auto& light_source : shapes) {
+      if (light_source.get() != pNearestShape && light_source->properties.intensity > 0.0f) {
+        vec lightDir = light_source->pos - nearestReflection->reflection.pos;
         float lightMag2 = lightDir.mag2();
         lightDir.normalize();
 
-        // Hacking in shadows.  Find each light source and determine if there is something blocking it.
-        // TODO: get this to work without looking weird, then clean it up
-        bool blocked = false;
-        for (const auto& shape_up2 : shapes) {
-          if (shape_up2.get() != secondary_shape.get()) {
-            Shape* pShape2 = shape_up2.get();
-            if (auto ref = pShape2->intersects_with(Ray{ nearestReflection->reflection.pos, lightDir }); ref.has_value()) {
-              vec shapeDir = ref->reflection.pos - nearestReflection->reflection.pos;
-              float shapeDirMag2 = shapeDir.mag2();
-              if (shapeDirMag2 < lightMag2) {
-                blocked = true;
-              }
-            }
-          }
-        }
-
+        bool blocked = isLightSourceBlocked(shapes, Ray{ nearestReflection->reflection.pos, lightDir }, light_source.get(), lightMag2);
         if (!blocked) {
-          float diffuse_light_intensity = std::max(0.f, nearestReflection->norm.dot(lightDir)) * secondary_shape->properties.intensity;
+          float diffuse_light_intensity = std::max(0.f, nearestReflection->norm.dot(lightDir)) * light_source->properties.intensity;
           const auto r = -reflect(-lightDir, nearestReflection->norm);
           const auto rdotprim = std::max(0.f, r.dot(primary_ray.dir));
-          float specular_light_intensity = myPow(rdotprim, pNearestShape->properties.specular_exp) * secondary_shape->properties.intensity;
+          float specular_light_intensity = myPow(rdotprim, pNearestShape->properties.specular_exp) * light_source->properties.intensity;
           final_color += pNearestShape->properties.color * pNearestShape->properties.diffuse_factor * diffuse_light_intensity +
-            secondary_shape->properties.color * pNearestShape->properties.specular_factor * specular_light_intensity;
+            light_source->properties.color * pNearestShape->properties.specular_factor * specular_light_intensity;
         }
       }
     }

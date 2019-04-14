@@ -32,9 +32,13 @@ public:
     ret += rhs;
     return ret;
   }
+  constexpr Color& operator*=(float rhs) {
+    color_vec *= rhs;
+    return *this;
+  }
   constexpr Color operator*(float rhs) const {
     Color ret = *this;
-    ret.color_vec *= rhs;
+    ret *= rhs;
     return ret;
   }
 };
