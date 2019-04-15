@@ -37,20 +37,35 @@ auto findNearestHitPoint(const std::vector<std::unique_ptr<Shape>>& shapes, cons
   return std::make_pair(pNearestShape, nearestReflection);
 }
 
-bool isLightSourceBlocked(const std::vector<std::unique_ptr<Shape>>& shapes, const Ray& incidentRay, Shape* pIgnoreShape, float dist2) {
+Color traceShadowRay(const std::vector<std::unique_ptr<Shape>>& shapes, const ReflectionData& orign, const Ray& fromEye, const Shape* pIgnoreShape) {
+  // find nearest shape
+  Shape* pNearestShape = nullptr;
+  float maxDist2 = 99999.f;
   for (const auto& shape_up2 : shapes) {
     if (shape_up2.get() != pIgnoreShape) {
       Shape* pShape2 = shape_up2.get();
-      if (auto ref = pShape2->intersects_with(incidentRay); ref.has_value()) {
-        vec shapeDir = ref->reflection.pos - incidentRay.pos;
+      if (auto ref = pShape2->intersects_with(orign.reflection); ref.has_value()) {
+        vec shapeDir = ref->reflection.pos - orign.reflection.pos;
         float shapeDirMag2 = shapeDir.mag2();
-        if (shapeDirMag2 < dist2) {
-          return true;
+        if (shapeDirMag2 < maxDist2) {
+          maxDist2 = shapeDirMag2;
+          pNearestShape = shape_up2.get();
         }
       }
     }
   }
-  return false;
+
+  // if the nearest object emits light, add some color
+  Color final_color = BLACK;
+  if (pNearestShape->properties.intensity > 0.f) {
+    float diffuse_light_intensity = std::max(0.f, orign.norm.dot(orign.reflection.dir)) * pNearestShape->properties.intensity;
+    const auto r = -reflect(-orign.reflection.dir, orign.norm);
+    const auto rdotprim = std::max(0.f, r.dot(fromEye.dir));
+    float specular_light_intensity = myPow(rdotprim, pNearestShape->properties.specular_exp) * pNearestShape->properties.intensity;
+    final_color += pIgnoreShape->properties.color * pIgnoreShape->properties.diffuse_factor * diffuse_light_intensity +
+      pNearestShape->properties.color * pIgnoreShape->properties.specular_factor * specular_light_intensity;
+  }
+  return final_color;
 }
 
 Color RayTracer::trace(const std::vector<std::unique_ptr<Shape>>& shapes, const Ray& incidentRay, int depth, const Shape* curShape) const {
@@ -77,16 +92,7 @@ Color RayTracer::trace(const std::vector<std::unique_ptr<Shape>>& shapes, const 
         vec lightDir = light_source->pos - nearestReflection->reflection.pos;
         float lightMag2 = lightDir.mag2();
         lightDir.normalize();
-
-        bool blocked = isLightSourceBlocked(shapes, Ray{ nearestReflection->reflection.pos, lightDir }, light_source.get(), lightMag2);
-        if (!blocked) {
-          float diffuse_light_intensity = std::max(0.f, nearestReflection->norm.dot(lightDir)) * light_source->properties.intensity;
-          const auto r = -reflect(-lightDir, nearestReflection->norm);
-          const auto rdotprim = std::max(0.f, r.dot(primary_ray.dir));
-          float specular_light_intensity = myPow(rdotprim, pNearestShape->properties.specular_exp) * light_source->properties.intensity;
-          final_color += pNearestShape->properties.color * pNearestShape->properties.diffuse_factor * diffuse_light_intensity +
-            light_source->properties.color * pNearestShape->properties.specular_factor * specular_light_intensity;
-        }
+        final_color += traceShadowRay(shapes, ReflectionData{ Ray{ nearestReflection->reflection.pos, lightDir }, nearestReflection->norm }, incidentRay, pNearestShape);
       }
     }
   }
