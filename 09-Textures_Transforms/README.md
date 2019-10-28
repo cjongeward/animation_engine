@@ -1,4 +1,4 @@
-# 8 Shadows and Anti-aliasing
+# 9 Textures, tranfroms, and meshes
 
 
 ## Description:
@@ -8,10 +8,13 @@ asdf
 * goal
 
 ## Result:
-![](/08-Shadows_Antialiasing/tracer/image.bmp)
+![](/09-Textures_Transforms/image.bmp)
 
 ## Implementation:
-* asdf
+* Added a Matrix class
+* Added transform method to shapes (rotations, translations, etc).  Now I can move the camera...
+* Added textures and UV mapping for rectangles
+* Added a mesh parser, and rendered a big glass bunny.  It takes 5 hours.
 
 ## Lessons Learned:
 * asdf
