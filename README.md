@@ -12,6 +12,7 @@ This is my ray tracer project. I have split it up into sub-projects that each ai
 [6 Perspective viewing](06-Perspective/README.md): Up until now I’ve used orthographic projection which is fine, but won’t look realistic. Now I’ll implement perspective projection and wrap my image with a floor, ceiling, and walls. And let’s put a mirror on the wall just for fun.    | ![](/06-Perspective/tracer/image.bmp)    
  [7 Design review and performance analysis](07-Design_and_perf/README.md): This program has gotten a bit slow. It takes 12 seconds to produce the previous image. In this project, I’ll take a break and review the design so far. Then I’ll go through and make some performance optimizations to speed this thing up.    | class diagram here.    
 [8 Shadows and Anti-aliasing](08-Shadows_Antialiasing/README.md):    | ![](/08-Shadows_Antialiasing/tracer/image.bmp)    
+[9 Tranformations, Textures, Meshes](09-Textures_Transforms/README.md): A Texture Manager, Transformation operator, and a big glass bunny mesh   | ![](/09-Textures_Transforms/image.bmp) 
 
 Coming soon
 
