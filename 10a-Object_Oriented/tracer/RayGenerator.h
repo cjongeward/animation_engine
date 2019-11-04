@@ -4,6 +4,13 @@
 #include "Shapes.h"
 #include <vector>
 
+struct Screen {
+    vec pos;
+    float sizex;
+    float sizey;
+    Screen(const vec &t_pos, float t_sizex, float t_sizey) : pos{t_pos}, sizex{t_sizex}, sizey{t_sizey} {}
+};
+
 // Generates a ray for each pixel on the screen
 class RayGenerator {
 public:

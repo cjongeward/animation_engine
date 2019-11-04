@@ -9,7 +9,7 @@
 #include "vec.h"
 #include "SurfaceProperties.h"
 
-std::vector<Triangle> parseMesh(std::string filename) {
+std::vector<std::unique_ptr<Shape>> parseMesh(std::string filename) {
   std::ifstream iStream{filename};
 
   std::string dontCare;
@@ -25,11 +25,11 @@ std::vector<Triangle> parseMesh(std::string filename) {
     points.emplace_back(x, y, z);
   }
 
-  std::vector<Triangle> tris;
+  std::vector<std::unique_ptr<Shape>> tris;
   for(int i = 0; i < numTris; ++i) {
     int numVals, p1, p2, p3;
     iStream >> numVals >> p1 >> p2 >> p3;
-    tris.emplace_back(points[p1], points[p2], points[p3], MIRRORISH);
+    tris.push_back(std::make_unique<Triangle>(points[p1], points[p2], points[p3], MIRRORISH));
   }
 
   return tris;

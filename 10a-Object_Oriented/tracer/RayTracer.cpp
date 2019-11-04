@@ -14,7 +14,8 @@ Color RayTracer::trace(const std::vector<std::unique_ptr<Shape>>& shapes) const 
   return trace(shapes, primary_ray, 0, nullptr);
 }
 
-auto findNearestHitPoint(const std::vector<std::unique_ptr<Shape>>& shapes, const Ray& incidentRay, const Shape* pIgnoreShape) {
+std::pair<const Shape*, std::optional<ReflectionData>>
+findNearestHitPoint(const std::vector<std::unique_ptr<Shape>>& shapes, const Ray& incidentRay, const Shape* pIgnoreShape) {
   const Shape* pNearestShape = nullptr;
   std::optional<ReflectionData> nearestReflection = std::nullopt;
   for (const auto& shape_up : shapes) {
@@ -94,7 +95,7 @@ Color RayTracer::trace(const std::vector<std::unique_ptr<Shape>>& shapes, const 
     // scan light sources to calculate diffuse and specular components
     for (auto& light_source : shapes) {
       if (light_source.get() != pNearestShape && light_source->properties.intensity > 0.0f) {
-        vec lightDir = light_source->pos - nearestReflection->reflection.pos;
+        vec lightDir = light_source->getPos() - nearestReflection->reflection.pos;
         float lightMag2 = lightDir.mag2();
         lightDir.normalize();
         final_color += traceShadowRay(shapes, ReflectionData{ Ray{ nearestReflection->reflection.pos, lightDir }, nearestReflection->norm, 0.f, 0.f }, incidentRay, pNearestShape);

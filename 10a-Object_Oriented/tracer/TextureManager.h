@@ -90,11 +90,11 @@ private:
 	std::vector<Texture> textures;
 
 	TextureManager() {
-		textures.emplace_back("floor.bmp");
-		textures.emplace_back("escher.bmp");
-		textures.emplace_back("escher2.bmp");
-		textures.emplace_back("fireman.bmp");
-		textures.emplace_back("grass.bmp");
+		textures.emplace_back("../floor.bmp");
+		textures.emplace_back("../escher.bmp");
+		textures.emplace_back("../escher2.bmp");
+		textures.emplace_back("../fireman.bmp");
+		textures.emplace_back("../grass.bmp");
 	}
 
 public:

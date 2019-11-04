@@ -155,6 +155,21 @@ public:
 	  }
 	  return *this;
 	}
+
+	float getMaxSizeEle() const {
+	    float row1 = sqrtf(vals[0]*vals[0] + vals[1]*vals[1] + vals[2]*vals[2]);
+        float row2 = sqrtf(vals[4]*vals[4] + vals[5]*vals[5] + vals[6]*vals[6]);
+        float row3 = sqrtf(vals[8]*vals[8] + vals[9]*vals[9] + vals[10]*vals[10]);
+        float max = fmaxf(row1, row2);
+        max = fmaxf(max, row3);
+        return max;
+	}
+};
+
+struct Ray {
+    vec pos;
+    vec dir;
+    Ray(const vec& t_pos, const vec& t_dir) : pos{ t_pos }, dir{ t_dir } {}
 };
 
 #endif

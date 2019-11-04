@@ -7,6 +7,7 @@
 #include "Color.h"
 #include "Settings.h"
 
+
 std::pair<const Shape*, std::optional<ReflectionData>>
     findNearestHitPoint(const std::vector<std::unique_ptr<Shape>>& shapes, const Ray& incidentRay, const Shape* pIgnoreShape);
 
