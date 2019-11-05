@@ -20,19 +20,19 @@ struct ReflectionData {
 
 class Shape {
 public:
-    SurfaceProperties properties;
-
-    explicit Shape(const SurfaceProperties &t_properties) : properties{t_properties} {}
-
     virtual std::optional<ReflectionData> intersects_with(const Ray &ray) const = 0;
     virtual void transform(const mat &xform) = 0;
     virtual const vec &getPos() const = 0;
 };
 
-class DrawableShape {
-private:
+struct DrawableShape {
     std::unique_ptr<Shape> shape;
     SurfaceProperties properties;
+
+    DrawableShape(std::unique_ptr<Shape> t_shape, const SurfaceProperties& t_properties) :
+    shape{std::move(t_shape)},
+    properties{t_properties}
+    {}
 };
 
 class Sphere : public Shape {
@@ -41,7 +41,7 @@ private:
     float radius;
 
 public:
-    Sphere(const vec &t_pos, const SurfaceProperties &t_properties, float t_radius);
+    Sphere(const vec &t_pos, float t_radius);
     std::optional<ReflectionData> intersects_with(const Ray &ray) const override;
     void transform(const mat &xfrom) override;
 
@@ -61,7 +61,7 @@ private:
     vec norm;
 
 public:
-    Triangle(const vec &t_pos, const vec &t_pos2, const vec &t_pos3, const SurfaceProperties &t_properties);
+    Triangle(const vec &t_pos, const vec &t_pos2, const vec &t_pos3);
     std::optional<ReflectionData> intersects_with(const Ray &ray) const override;
     void transform(const mat &xfrom) override;
 
@@ -80,7 +80,7 @@ private:
     vec norm;
 
 public:
-    Rect(const vec &t_pos, const vec &t_pos2, const vec &t_pos3, const SurfaceProperties &t_properties);
+    Rect(const vec &t_pos, const vec &t_pos2, const vec &t_pos3);
     std::optional<ReflectionData> intersects_with(const Ray &ray) const override;
     void transform(const mat &xfrom) override;
 
@@ -93,7 +93,7 @@ class CompositeShape : public Shape {
 public:
     std::vector<std::unique_ptr<Shape>> shapes;
 
-    explicit CompositeShape(std::vector<std::unique_ptr<Shape>> t_shapes, const SurfaceProperties &t_properties);
+    explicit CompositeShape(std::vector<std::unique_ptr<Shape>> t_shapes);
     std::optional<ReflectionData> intersects_with(const Ray &ray) const final;
     void transform(const mat &xfrom) final;
 
@@ -110,7 +110,7 @@ private:
     std::unique_ptr<Shape> boundingShape;
 
 public:
-    explicit Box(const SurfaceProperties &t_properties);
+    Box();
     Shape *getBoundingShape() override;
     const Shape *getBoundingShape() const override;
 };
@@ -120,7 +120,7 @@ private:
     std::unique_ptr<Shape> boundingShape;
 
 public:
-    Mesh(const std::string &filename, const SurfaceProperties &t_properties);
+    explicit Mesh(const std::string &filename);
     Shape *getBoundingShape() override;
     const Shape *getBoundingShape() const override;
 };

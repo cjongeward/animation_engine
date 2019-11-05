@@ -30,16 +30,15 @@ std::optional<ReflectionData> Sphere::intersects_with(const Ray &incident_ray) c
     return std::make_optional(ReflectionData(Ray(p_sphere_surface, v_reflection), v_norm, 0.f, 0.f));
 }
 
+Sphere::Sphere(const vec &t_pos, float t_radius) :
+        pos{t_pos},
+        radius{t_radius}
+        {}
+
 void Sphere::transform(const mat &xfrom) {
     pos = xfrom * pos;
     radius *= xfrom.getMaxSizeEle();
 }
-
-Sphere::Sphere(const vec &t_pos, const SurfaceProperties &t_properties, float t_radius) :
-        Shape{t_properties},
-        pos{t_pos},
-        radius{t_radius}
-        {}
 
 template<class FUNC>
 std::optional<ReflectionData>
@@ -82,18 +81,7 @@ std::optional<ReflectionData> Triangle::intersects_with(const Ray &incident_ray)
     });
 }
 
-void Triangle::transform(const mat &xfrom) {
-    pos = xfrom * pos;
-    pos2 = xfrom * pos2;
-    pos3 = xfrom * pos3;
-    p2mp1 = pos - pos2;
-    p3mp1 = pos - pos3;
-    norm = -p3mp1.cross(p2mp1);
-    norm.normalize();
-}
-
-Triangle::Triangle(const vec &t_pos, const vec &t_pos2, const vec &t_pos3, const SurfaceProperties &t_properties) :
-        Shape{t_properties},
+Triangle::Triangle(const vec &t_pos, const vec &t_pos2, const vec &t_pos3) :
         pos{t_pos},
         pos2{t_pos2},
         pos3{t_pos3},
@@ -104,14 +92,23 @@ Triangle::Triangle(const vec &t_pos, const vec &t_pos2, const vec &t_pos3, const
     norm.normalize();
 }
 
+void Triangle::transform(const mat &xfrom) {
+    pos = xfrom * pos;
+    pos2 = xfrom * pos2;
+    pos3 = xfrom * pos3;
+    p2mp1 = pos - pos2;
+    p3mp1 = pos - pos3;
+    norm = -p3mp1.cross(p2mp1);
+    norm.normalize();
+}
+
 std::optional<ReflectionData> Rect::intersects_with(const Ray &incident_ray) const {
     return barycentric_intersects(pos, p2mp1, p3mp1, norm, incident_ray, [](float beta, float gamma) {
         return beta >= 0.f && gamma >= 0.f && beta <= 1.f && gamma <= 1.f;
     });
 }
 
-Rect::Rect(const vec &t_pos, const vec &t_pos2, const vec &t_pos3, const SurfaceProperties &t_properties) :
-        Shape{t_properties},
+Rect::Rect(const vec &t_pos, const vec &t_pos2, const vec &t_pos3) :
         pos{t_pos},
         pos2{t_pos2},
         pos3{t_pos3},
@@ -133,15 +130,14 @@ void Rect::transform(const mat &xfrom) {
 }
 
 
-CompositeShape::CompositeShape(std::vector<std::unique_ptr<Shape>> t_shapes, const SurfaceProperties &t_properties) :
-    Shape{t_properties},
+CompositeShape::CompositeShape(std::vector<std::unique_ptr<Shape>> t_shapes) :
     shapes{std::move(t_shapes)}
     { }
 
 std::optional<ReflectionData> CompositeShape::intersects_with(const Ray &ray) const {
     if(getBoundingShape()->intersects_with(ray)) {
-        auto hp = findNearestHitPoint(shapes, ray, nullptr);
-        return hp.second;
+        auto hp = findNearestHitPoint(shapes, ray);
+        return hp;
     }
     return std::nullopt;
 }
@@ -162,20 +158,20 @@ static constexpr vec brf{0.5f, -0.5f, -0.5f};
 static constexpr vec brb{0.5f, -0.5f, 0.5f};
 static constexpr vec trf{0.5f, 0.5f, -0.5f};
 static constexpr vec trb{0.5f, 0.5f, 0.5f};
-auto makeBox(const SurfaceProperties& t_properties) {
+auto makeBox() {
     std::vector<std::unique_ptr<Shape>> shapes;
-    shapes.emplace_back(std::make_unique<Rect>(blb, brb, tlb, t_properties));
-    shapes.emplace_back(std::make_unique<Rect>(brb, brf, trb, t_properties));
-    shapes.emplace_back(std::make_unique<Rect>(brf, blf, trf, t_properties));
-    shapes.emplace_back(std::make_unique<Rect>(blf, blb, tlf, t_properties));
-    shapes.emplace_back(std::make_unique<Rect>(tlb, trb, tlf, t_properties));
-    shapes.emplace_back(std::make_unique<Rect>(blf, brf, blb, t_properties));
+    shapes.emplace_back(std::make_unique<Rect>(blb, brb, tlb));
+    shapes.emplace_back(std::make_unique<Rect>(brb, brf, trb));
+    shapes.emplace_back(std::make_unique<Rect>(brf, blf, trf));
+    shapes.emplace_back(std::make_unique<Rect>(blf, blb, tlf));
+    shapes.emplace_back(std::make_unique<Rect>(tlb, trb, tlf));
+    shapes.emplace_back(std::make_unique<Rect>(blf, brf, blb));
     return shapes;
 }
 
-Box::Box(const SurfaceProperties &t_properties) :
-    CompositeShape{makeBox(t_properties), t_properties},
-    boundingShape{std::make_unique<Sphere>(vec{0.f, 0.f,0.f}, t_properties, 1.8f)}
+Box::Box() :
+    CompositeShape{makeBox()},
+    boundingShape{std::make_unique<Sphere>(vec{0.f, 0.f,0.f}, 1.8f)}
 { }
 
 Shape *Box::getBoundingShape() {
@@ -186,9 +182,9 @@ const Shape *Box::getBoundingShape() const {
 }
 
 
-Mesh::Mesh(const std::string& filename, const SurfaceProperties &t_properties) :
-    CompositeShape(parseMesh(filename), t_properties),
-    boundingShape{std::make_unique<Sphere>(vec{0.f, 0.f,0.f}, t_properties, 1.f)}
+Mesh::Mesh(const std::string& filename) :
+    CompositeShape(parseMesh(filename)),
+    boundingShape{std::make_unique<Sphere>(vec{0.f, 0.f,0.f}, 1.f)}
 {
     boundingShape->transform(mat::scale(vec{1.8f, 1.8f, 1.8f}));
 }

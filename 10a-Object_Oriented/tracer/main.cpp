@@ -13,12 +13,12 @@
 #include <sstream>
 #include <chrono>
 
-void transform(std::vector<std::unique_ptr<Shape>>& shapes) {
+void transform(std::vector<DrawableShape>& drawableShapes) {
   mat cam_pos = mat::translation(-vec{-8.f, 3.f, -1.f});
   mat cam_rot = mat::rotation(PI4, PI4/3.f, 0.f);
   mat xform = cam_rot * cam_pos;
-  for(auto& shape : shapes) {
-    shape->transform(xform);
+  for(auto& drawableShape : drawableShapes) {
+    drawableShape.shape->transform(xform);
   }
 }
 

@@ -8,8 +8,11 @@
 #include "Settings.h"
 
 
-std::pair<const Shape*, std::optional<ReflectionData>>
-    findNearestHitPoint(const std::vector<std::unique_ptr<Shape>>& shapes, const Ray& incidentRay, const Shape* pIgnoreShape);
+std::pair<const DrawableShape*, std::optional<ReflectionData>>
+    findNearestHitPoint(const std::vector<DrawableShape>& shapes, const Ray& incidentRay, const DrawableShape* pIgnoreShape);
+
+std::optional<ReflectionData>
+    findNearestHitPoint(const std::vector<std::unique_ptr<Shape>>& shapes, const Ray& incidentRay);
 
 class RayTracer {
 private:
@@ -18,11 +21,11 @@ private:
   const float ambient_light_intensity = AMBIENT_LIGHT_INTENSITY;
   const int max_depth = MAX_RECURSIVE_DEPTH;
 
-  Color trace(const std::vector<std::unique_ptr<Shape>>& shapes, const Ray& incidentRay, int depth, const Shape* curShape) const;
+  Color trace(const std::vector<DrawableShape>& shapes, const Ray& incidentRay, int depth, const DrawableShape* curShape) const;
 
 public:
   RayTracer(const Ray& t_primary) : primary_ray{ t_primary } {}
-  Color trace(const std::vector<std::unique_ptr<Shape>>& shapes) const;
+  Color trace(const std::vector<DrawableShape>& shapes) const;
 };
 
 

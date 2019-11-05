@@ -29,7 +29,7 @@ std::vector<std::unique_ptr<Shape>> parseMesh(std::string filename) {
   for(int i = 0; i < numTris; ++i) {
     int numVals, p1, p2, p3;
     iStream >> numVals >> p1 >> p2 >> p3;
-    tris.push_back(std::make_unique<Triangle>(points[p1], points[p2], points[p3], MIRRORISH));
+    tris.push_back(std::make_unique<Triangle>(points[p1], points[p2], points[p3]));
   }
 
   return tris;
