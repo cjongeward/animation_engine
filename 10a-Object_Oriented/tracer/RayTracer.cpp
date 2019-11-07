@@ -54,22 +54,27 @@ findNearestHitPoint(const std::vector<DrawableShape>& shapes, const Ray& inciden
   return std::make_pair(pNearestDrawableShape, nearestReflection);
 }
 
-Color traceShadowRay(const std::vector<DrawableShape>& shapes, const ReflectionData& orign, const Ray& fromEye, const DrawableShape* pIgnoreShape) {
-  // find nearest shape
-  const DrawableShape* pNearestShape = nullptr;
-  float maxDist2 = 99999.f;
-  for (const auto& drawableShape : shapes) {
-    if (&drawableShape != pIgnoreShape) {
-      if (auto ref = drawableShape.shape->intersects_with(orign.reflection); ref.has_value()) {
-        vec shapeDir = ref->reflection.pos - orign.reflection.pos;
-        float shapeDirMag2 = shapeDir.mag2();
-        if (shapeDirMag2 < maxDist2) {
-          maxDist2 = shapeDirMag2;
-          pNearestShape = &drawableShape;
+const DrawableShape* findNearestShape(const std::vector<DrawableShape>& shapes, const ReflectionData& origin, const DrawableShape* pIgnoreShape) {
+    const DrawableShape* pNearestShape = nullptr;
+    float maxDist2 = 99999.f;
+    for (const auto& drawableShape : shapes) {
+        if (&drawableShape != pIgnoreShape) {
+            if (auto ref = drawableShape.shape->intersects_with(origin.reflection); ref.has_value()) {
+                vec shapeDir = ref->reflection.pos - origin.reflection.pos;
+                float shapeDirMag2 = shapeDir.mag2();
+                if (shapeDirMag2 < maxDist2) {
+                    maxDist2 = shapeDirMag2;
+                    pNearestShape = &drawableShape;
+                }
+            }
         }
-      }
     }
-  }
+    return pNearestShape;
+}
+
+Color traceShadowRay(const std::vector<DrawableShape>& shapes, const ReflectionData& orign, const Ray& fromEye, const DrawableShape* pIgnoreShape) {
+
+  const DrawableShape* pNearestShape = findNearestShape(shapes, orign, pIgnoreShape);
 
   // if the nearest object emits light, add some color
   Color final_color = BLACK;
@@ -84,39 +89,50 @@ Color traceShadowRay(const std::vector<DrawableShape>& shapes, const ReflectionD
   return final_color;
 }
 
+Color getEmittedLight( const DrawableShape *pNearestDrawableShape) {
+    return pNearestDrawableShape->properties.color * pNearestDrawableShape->properties.intensity;
+}
+
+Color getAmbientColor(const DrawableShape* pNearestDrawableShape, const ReflectionData& nearestReflection, float ambient_light_intensity) {
+    if(auto tex = TextureManager::instance().getTexture(pNearestDrawableShape->properties.textureId); tex != nullptr) {
+        return tex->getColor(nearestReflection.u, nearestReflection.v) * ambient_light_intensity;
+    }
+    return pNearestDrawableShape->properties.color * ambient_light_intensity;
+}
+
+Color lightItUp(const std::vector<DrawableShape>& shapes, const DrawableShape* pNearestDrawableShape, const ReflectionData& nearestReflection, const Ray& incidentRay) {
+    // scan light sources to calculate diffuse and specular components
+    Color final_color = BLACK;
+    for (auto& light_source : shapes) {
+        if (&light_source != pNearestDrawableShape && light_source.properties.intensity > 0.0f) {
+            vec lightDir = light_source.shape->getPos() - nearestReflection.reflection.pos;
+            float lightMag2 = lightDir.mag2();
+            lightDir.normalize();
+            final_color += traceShadowRay(shapes, ReflectionData{ Ray{ nearestReflection.reflection.pos, lightDir }, nearestReflection.norm, 0.f, 0.f }, incidentRay, pNearestDrawableShape);
+        }
+    }
+    return final_color;
+}
+
 Color RayTracer::trace(const std::vector<DrawableShape>& shapes, const Ray& incidentRay, int depth, const DrawableShape* curShape) const {
-  if (depth >= max_depth) { // recursive base case
+  if (depth >= max_depth) { // base case
     return BLACK;
   }
 
   auto [pNearestDrawableShape, nearestReflection] = findNearestHitPoint(shapes, incidentRay, curShape);
 
-  // light it up
   Color final_color = BLACK;
   if (!nearestReflection.has_value()) {
     final_color = background_color;
   }
   else {
-    final_color = pNearestDrawableShape->properties.color * pNearestDrawableShape->properties.intensity; // if shape is a light source
-    if(auto tex = TextureManager::instance().getTexture(pNearestDrawableShape->properties.textureId); tex != nullptr) {
-      final_color += tex->getColor(nearestReflection->u, nearestReflection->v) * ambient_light_intensity;
-    }
-    else {
-      final_color += pNearestDrawableShape->properties.color * ambient_light_intensity;
-    }
-    Color reflected_color = trace(shapes, nearestReflection->reflection, depth + 1, pNearestDrawableShape);
-    final_color += reflected_color * pNearestDrawableShape->properties.reflect_factor;
-
-    // scan light sources to calculate diffuse and specular components
-    for (auto& light_source : shapes) {
-      if (&light_source != pNearestDrawableShape && light_source.properties.intensity > 0.0f) {
-        vec lightDir = light_source.shape->getPos() - nearestReflection->reflection.pos;
-        float lightMag2 = lightDir.mag2();
-        lightDir.normalize();
-        final_color += traceShadowRay(shapes, ReflectionData{ Ray{ nearestReflection->reflection.pos, lightDir }, nearestReflection->norm, 0.f, 0.f }, incidentRay, pNearestDrawableShape);
-      }
-    }
+    final_color = getEmittedLight(pNearestDrawableShape);
+    final_color += getAmbientColor(pNearestDrawableShape, nearestReflection.value(), ambient_light_intensity);
+    final_color += trace(shapes, nearestReflection->reflection, depth + 1, pNearestDrawableShape) * pNearestDrawableShape->properties.reflect_factor;
+    final_color += lightItUp(shapes, pNearestDrawableShape, nearestReflection.value(), incidentRay);
   }
+
   return final_color;
 }
+
 

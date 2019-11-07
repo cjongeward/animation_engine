@@ -35,6 +35,7 @@ constexpr SurfaceProperties PIC2{ LIGHTGREY, 0.5f, 0.15f, 10, 0.0f, 0.f, "../esc
 constexpr SurfaceProperties PIC3{ LIGHTGREY, 0.5f, 0.15f, 10, 0.0f, 0.f, "../fireman.bmp" };
 constexpr SurfaceProperties GRASS{ LIGHTGREY, 0.5f, 0.15f, 10, 0.0f, 0.f, "../grass.bmp" };
 constexpr SurfaceProperties WHITEISH{ REALLYLIGHTGREY, 0.5f, 0.0f, 10, 0.0f, 0.f };
+constexpr SurfaceProperties REDISH{ RED, 0.6f, 0.5f, 200, 0.3f, 0.f };
 constexpr SurfaceProperties YELLOWISH{ Color{0.f, 0.6f, 0.3f}, 0.5f, 0.15f, 10, 0.0f, 0.f };
 constexpr SurfaceProperties BLACKISH{ BLACK, 0.5f, 0.15f, 10, 0.0f, 0.f };
 constexpr SurfaceProperties BROWNISH{ BROWN, 0.5f, 0.05f, 10, 0.0f, 0.f };

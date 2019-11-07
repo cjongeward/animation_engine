@@ -8,11 +8,6 @@
 #include "RayGenerator.h"
 #include "Settings.h"
 
-// for timing
-#include <string>
-#include <sstream>
-#include <chrono>
-
 void transform(std::vector<DrawableShape>& drawableShapes) {
   mat cam_pos = mat::translation(-vec{-8.f, 3.f, -1.f});
   mat cam_rot = mat::rotation(PI4, PI4/3.f, 0.f);
@@ -33,10 +28,6 @@ int main() {
   for (int row = 0; row < RESY; ++row) {
     for (int col = 0; col < RESX; ++col) {
       std::vector<Ray> rays = rayGenerator.MakeRay(row, col);
-      // for debugging
-      if (RESY - row - 1 == 595 && col == 400) {
-        int blah = 0;
-      }
       // get average color for all rays in the pixel
       Color final_color = BLACK;
       for (auto& ray : rays) {

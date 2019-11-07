@@ -174,9 +174,6 @@ Box::Box() :
     boundingShape{std::make_unique<Sphere>(vec{0.f, 0.f,0.f}, 1.8f)}
 { }
 
-Shape *Box::getBoundingShape() {
-    return boundingShape.get();
-}
 const Shape *Box::getBoundingShape() const {
     return boundingShape.get();
 }
@@ -189,9 +186,6 @@ Mesh::Mesh(const std::string& filename) :
     boundingShape->transform(mat::scale(vec{1.8f, 1.8f, 1.8f}));
 }
 
-Shape *Mesh::getBoundingShape() {
-    return boundingShape.get();
-}
 const Shape *Mesh::getBoundingShape() const {
     return boundingShape.get();
 }

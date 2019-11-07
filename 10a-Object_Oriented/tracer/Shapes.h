@@ -97,8 +97,10 @@ public:
     std::optional<ReflectionData> intersects_with(const Ray &ray) const final;
     void transform(const mat &xfrom) final;
 
-    virtual Shape *getBoundingShape() = 0;
     virtual const Shape *getBoundingShape() const = 0;
+    Shape *getBoundingShape() {
+        return const_cast<Shape*>( static_cast<const CompositeShape*>(this)->getBoundingShape());
+    }
 
     const vec &getPos() const override {
         return shapes.front()->getPos();
@@ -111,7 +113,6 @@ private:
 
 public:
     Box();
-    Shape *getBoundingShape() override;
     const Shape *getBoundingShape() const override;
 };
 
@@ -121,7 +122,6 @@ private:
 
 public:
     explicit Mesh(const std::string &filename);
-    Shape *getBoundingShape() override;
     const Shape *getBoundingShape() const override;
 };
 
