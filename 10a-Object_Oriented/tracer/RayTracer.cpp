@@ -128,7 +128,9 @@ Color RayTracer::trace(const std::vector<DrawableShape>& shapes, const Ray& inci
   else {
     final_color = getEmittedLight(pNearestDrawableShape);
     final_color += getAmbientColor(pNearestDrawableShape, nearestReflection.value(), ambient_light_intensity);
-    final_color += trace(shapes, nearestReflection->reflection, depth + 1, pNearestDrawableShape) * pNearestDrawableShape->properties.reflect_factor;
+    if(pNearestDrawableShape->properties.reflect_factor > 0.f) {
+        final_color += trace(shapes, nearestReflection->reflection, depth + 1, pNearestDrawableShape) * pNearestDrawableShape->properties.reflect_factor;
+    }
     final_color += lightItUp(shapes, pNearestDrawableShape, nearestReflection.value(), incidentRay);
   }
 
