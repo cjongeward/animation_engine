@@ -73,12 +73,12 @@ Color RayTracer::trace(const Scene& scene, const Ray& incidentRay, int depth, co
   }
   else {
       auto surfaceProperties = scene.getProperties(nearestReflection->first);
-      final_color = getEmittedLight(surfaceProperties);
+//      final_color = getEmittedLight(surfaceProperties);
       final_color += getAmbientColor(surfaceProperties, nearestReflection->second, ambient_light_intensity);
-      if(surfaceProperties.reflect_factor > 0.f) {
-          final_color += trace(scene, nearestReflection->second.reflection, depth + 1, nearestReflection->first) * surfaceProperties.reflect_factor;
-      }
-      final_color += lightItUp(scene, nearestReflection->first, nearestReflection->second, incidentRay);
+//      if(surfaceProperties.reflect_factor > 0.f) {
+//          final_color += trace(scene, nearestReflection->second.reflection, depth + 1, nearestReflection->first) * surfaceProperties.reflect_factor;
+//      }
+//      final_color += lightItUp(scene, nearestReflection->first, nearestReflection->second, incidentRay);
   }
 
   return final_color;

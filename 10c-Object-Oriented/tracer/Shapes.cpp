@@ -42,50 +42,40 @@ void Sphere::transform(const mat &xfrom) {
 
 template<class FUNC>
 std::optional<ReflectionData>
-barycentric_intersects(const vec pos1, const vec p2mp1, const vec p3mp1, const vec norm, const Ray incident_ray, FUNC outOfBounds) {
+barycentric_intersects(const vec& pos1, const vec& p2mp1, const vec& p3mp1, const vec& norm, const Ray& incident_ray, FUNC outOfBounds) {
     // use Cramers rule to solve for barycentric coordinates (alpha and gamma) and t in this equation
     // incident_ray.pos + incident_ray.dir * t = pos1 + alpha * (pos2 - pos1) + gamma * (pos3 - pos1);
     const auto& dir = incident_ray.dir;
-    const float incident_dot_norm = -dir.dot(norm);
-    // early abort if surface is facing away from the ray
-//    if (incident_dot_norm < 0.f) {
-//        return std::nullopt;
-//    }
     const auto AmP = pos1 - incident_ray.pos;
-//    auto getDet = [](const float* m){ return m[0] * (m[4] * m[8] - m[5] * m[7]) + m[1] * (m[5] * m[6] - m[3] * m[8]) + m[2] * (m[3] * m[7] - m[4] * m[6]); };
-//    const float mata[] = {p3mp1.x, p2mp1.x, dir.x, p3mp1.y, p2mp1.y, dir.y, p3mp1.z, p2mp1.z, dir.z};
-//    const float matt[] = {p3mp1.x, p2mp1.x, AmP.x, p3mp1.y, p2mp1.y, AmP.y, p3mp1.z, p2mp1.z, AmP.z};
-//    const float matgam[] = {p3mp1.x, AmP.x, dir.x, p3mp1.y, AmP.y, dir.y, p3mp1.z, AmP.z, dir.z};
-//    const float matbet[] = {AmP.x, p2mp1.x, dir.x, AmP.y, p2mp1.y, dir.y, AmP.z, p2mp1.z, dir.z};
-//    // Determinates...  I really need to use a matrix class that has a det method`
-//    const float detA = getDet(mata);
-//    const float tDet = getDet(matt);
-//    const float gamDet = getDet(matgam);
-//    const float betDet = getDet(matbet);
-    const float detA = p3mp1.x * (p2mp1.y * dir.z - dir.y * p2mp1.z) + p2mp1.x * (dir.y * p3mp1.z - p3mp1.y * dir.z) +
-                       dir.x * (p3mp1.y * p2mp1.z - p2mp1.y * p3mp1.z);
-    const float tDet = p3mp1.x * (p2mp1.y * AmP.z - AmP.y * p2mp1.z) + p2mp1.x * (AmP.y * p3mp1.z - p3mp1.y * AmP.z) +
-                       AmP.x * (p3mp1.y * p2mp1.z - p2mp1.y * p3mp1.z);
-    const float gamDet = p3mp1.x * (AmP.y * dir.z - dir.y * AmP.z) + AmP.x * (dir.y * p3mp1.z - p3mp1.y * dir.z) +
-                         dir.x * (p3mp1.y * AmP.z - AmP.y * p3mp1.z);
-    const float betDet = AmP.x * (p2mp1.y * dir.z - dir.y * p2mp1.z) + p2mp1.x * (dir.y * AmP.z - AmP.y * dir.z) +
-                         dir.x * (AmP.y * p2mp1.z - p2mp1.y * AmP.z);
+    const float mata[] = {p3mp1.x, p2mp1.x, dir.x, p3mp1.y, p2mp1.y, dir.y, p3mp1.z, p2mp1.z, dir.z};
+    const float matt[] = {p3mp1.x, p2mp1.x, AmP.x, p3mp1.y, p2mp1.y, AmP.y, p3mp1.z, p2mp1.z, AmP.z};
+    const float matgam[] = {p3mp1.x, AmP.x, dir.x, p3mp1.y, AmP.y, dir.y, p3mp1.z, AmP.z, dir.z};
+    const float matbet[] = {AmP.x, p2mp1.x, dir.x, AmP.y, p2mp1.y, dir.y, AmP.z, p2mp1.z, dir.z};
+
+    auto getDet = [](const float* m){ return m[0] * (m[4] * m[8] - m[5] * m[7]) + m[1] * (m[5] * m[6] - m[3] * m[8]) + m[2] * (m[3] * m[7] - m[4] * m[6]); };
+    const float detA = getDet(mata);
+    const float tDet = getDet(matt);
+    const float gamDet = getDet(matgam);
+    const float betDet = getDet(matbet);
+
     const float overDetA = 1.0f / detA;
     const float beta = betDet * overDetA;
     const float gamma = gamDet * overDetA;
     const float t = tDet * overDetA;
-    // EXAMPLE: multiple branches in one if() statement trashes branch prediction, and somehow, cache performance
-    if (outOfBounds(t, beta, gamma, incident_dot_norm)) {
+
+    const float incident_dot_norm = -dir.dot(norm);
+    if ( (incident_dot_norm < 0.f) | (t < 0.f) | outOfBounds(beta, gamma)) {
         return std::nullopt;
     }
+
     const auto hitPoint = incident_ray.pos + incident_ray.dir * t;
     auto reflection = reflect(incident_ray.dir, norm);
     return std::make_optional(ReflectionData(Ray(hitPoint, reflection), norm, beta, gamma));
 }
 
 std::optional<ReflectionData> Triangle::intersects_with(const Ray &ray) const {
-    return barycentric_intersects(pos, p2mp1, p3mp1, norm, ray, [](float t, float beta, float gamma, float facingToward) {
-        return (t < 0.f) | (beta < 0.f) | (gamma < 0.f) | (beta + gamma > 1.f) | (facingToward <= 0.f);
+    return barycentric_intersects(pos, p2mp1, p3mp1, norm, ray, [](float beta, float gamma) {
+        return (beta < 0.f) | (gamma < 0.f) | (beta + gamma > 1.f);
     });
 }
 
@@ -111,8 +101,8 @@ void Triangle::transform(const mat &xfrom) {
 }
 
 std::optional<ReflectionData> Rect::intersects_with(const Ray &incident_ray) const {
-    return barycentric_intersects(pos, p2mp1, p3mp1, norm, incident_ray, [](float t, float beta, float gamma, float facingToward) {
-        return (t < 0.f) | (beta < 0.f) | (gamma < 0.f) | (beta > 1.f) | (gamma > 1.f) | (facingToward <= 0.f);
+    return barycentric_intersects(pos, p2mp1, p3mp1, norm, incident_ray, [](float beta, float gamma) {
+        return (beta < 0.f) | (gamma < 0.f) | (beta > 1.f) | (gamma > 1.f);
     });
 }
 
@@ -198,6 +188,7 @@ std::optional<ReflectionData> Mesh::intersects_with(const Ray& ray) const {
     if(boundingSphere.intersects_with(ray)) {
         std::optional<ReflectionData> nearestReflection = std::nullopt;
         std::vector<ReflectionData> collisions;
+        collisions.reserve(6);
         for (const auto& tri : triangles) {
             auto reflected = tri.intersects_with(ray);
             if (reflected.has_value()) {
