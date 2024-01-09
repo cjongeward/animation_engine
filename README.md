@@ -15,7 +15,7 @@ This is my ray tracer project. I have split it up into sub-projects that each ai
 [9 Tranformations, Textures, Meshes](09-Textures_Transforms/README.md): A Texture Manager, Transformation operator, and a big glass bunny mesh   | ![](/09-Textures_Transforms/image.bmp) 
 [10 lighting and decorating](rt/README.md): Added lighting effects and decorated the room  | ![](/rt/image.bmp) 
 
-Coming soon
+TODO:
 
 * [color clamping]
 * [rotations]
@@ -24,9 +24,7 @@ Coming soon
 * [parallelizing]
 * [textures]
 * [bump maps]
-* [meshes]
 * [composite shapes]
 * [making a video]
 * [animating with a predefined path]
 * [animating with a physics engine]
-* [running in real time]
