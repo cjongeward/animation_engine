@@ -7,6 +7,7 @@ class Color {
   vec color_vec;
 
 public:
+  constexpr Color() : color_vec{ 1.f, 1.f, 1.f } {}
   constexpr Color(float red, float green, float blue) : color_vec{ red, green, blue } {}
   // colors greater than 1.0 are invalid
   constexpr void clamp() {

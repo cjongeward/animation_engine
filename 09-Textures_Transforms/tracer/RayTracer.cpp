@@ -1,4 +1,5 @@
 #include "RayTracer.h"
+#include <optional>
 
 float myPow(float val, int exp) {
   int curexp = 1;
@@ -10,34 +11,11 @@ float myPow(float val, int exp) {
   return curval;
 }
 
-Color RayTracer::trace(const std::vector<std::unique_ptr<Shape>>& shapes) const {
-  return trace(shapes, primary_ray, 0, nullptr);
+Color RayTracer::trace(const std::unique_ptr<Shape>& rootShape) const {
+  return trace(rootShape, primary_ray, 0, nullptr);
 }
 
-auto findNearestHitPoint(const std::vector<std::unique_ptr<Shape>>& shapes, const Ray& incidentRay, const Shape* pIgnoreShape) {
-  const Shape* pNearestShape = nullptr;
-  std::optional<ReflectionData> nearestReflection = std::nullopt;
-  for (const auto& shape_up : shapes) {
-    Shape* pShape = shape_up.get();
-    Shape& shape = *pShape;
-    if (&shape != pIgnoreShape) {
-      auto reflected = shape.intersects_with(incidentRay);
-      if (reflected.has_value()) {
-        if (!nearestReflection.has_value()) {
-          pNearestShape = &shape;
-          nearestReflection = reflected;
-        }
-        else if (dist2(reflected->reflection.pos, incidentRay.pos) < dist2(nearestReflection->reflection.pos, incidentRay.pos)) {
-          pNearestShape = &shape;
-          nearestReflection = reflected;
-        }
-      }
-    }
-  }
-  return std::make_pair(pNearestShape, nearestReflection);
-}
-
-Color traceShadowRay(const std::vector<std::unique_ptr<Shape>>& shapes, const ReflectionData& orign, const Ray& fromEye, const Shape* pIgnoreShape) {
+Color traceShadowRay(const std::vector<std::unique_ptr<Shape>>& shapes, const HitData& orign, const Ray& fromEye, const Shape* pIgnoreShape) {
   // find nearest shape
   Shape* pNearestShape = nullptr;
   float maxDist2 = 99999.f;
@@ -68,38 +46,48 @@ Color traceShadowRay(const std::vector<std::unique_ptr<Shape>>& shapes, const Re
   return final_color;
 }
 
-Color RayTracer::trace(const std::vector<std::unique_ptr<Shape>>& shapes, const Ray& incidentRay, int depth, const Shape* curShape) const {
+Color RayTracer::trace(const std::unique_ptr<Shape>& shape, const Ray& incidentRay, int depth, const Shape* curShape) const {
   if (depth >= max_depth) { // recursive base case
     return BLACK;
   }
 
-  auto [pNearestShape, nearestReflection] = findNearestHitPoint(shapes, incidentRay, curShape);
+  auto RayTraceData = shape->findNearestHitPoint(incidentRay, curShape);
 
   // light it up
   Color final_color = BLACK;
-  if (!nearestReflection.has_value()) {
+  if (!RayTraceData.hitInfo.has_value()) {
     final_color = background_color;
   }
+  else if (RayTraceData.hitShape->properties.intensity > 0.f) {
+    final_color = RayTraceData.hitShape->properties.color;
+  }
   else {
-    final_color = pNearestShape->properties.color * pNearestShape->properties.intensity; // if shape is a light source
-    if(auto tex = TextureManager::instance().getTexture(pNearestShape->properties.textureId); tex != nullptr) {
-      final_color += tex->getColor(nearestReflection->u, nearestReflection->v) * ambient_light_intensity;
+    if (auto tex = TextureManager::instance().getTexture(RayTraceData.hitShape->properties.textureId); tex != nullptr) {
+      final_color += tex->getColor(RayTraceData.hitInfo->u, RayTraceData.hitInfo->v) * ambient_light_intensity;
     }
+//    else if (auto& normalMap = RayTraceData.hitShape->properties.normalMap; normalMap.has_value()) {
+
+ //   }
     else {
-      final_color += pNearestShape->properties.color * ambient_light_intensity;
+      final_color += RayTraceData.hitShape->properties.color * ambient_light_intensity;
     }
-    Color reflected_color = trace(shapes, nearestReflection->reflection, depth + 1, pNearestShape);
-    final_color += reflected_color * pNearestShape->properties.reflect_factor;
+    Color reflected_color = trace(shape, RayTraceData.hitInfo->reflection, depth + 1, RayTraceData.hitShape);
+    final_color += reflected_color * RayTraceData.hitShape->properties.reflect_factor;
 
     // scan light sources to calculate diffuse and specular components
     for (auto& light_source : shapes) {
-      if (light_source.get() != pNearestShape && light_source->properties.intensity > 0.0f) {
-        vec lightDir = light_source->pos - nearestReflection->reflection.pos;
+      if (light_source.get() != RayTraceData.hitShape && light_source->properties.intensity > 0.0f) {
+        vec lightDir = light_source->pos - RayTraceData.hitInfo->reflection.pos;
         float lightMag2 = lightDir.mag2();
         lightDir.normalize();
-        final_color += traceShadowRay(shapes, ReflectionData{ Ray{ nearestReflection->reflection.pos, lightDir }, nearestReflection->norm, 0.f, 0.f }, incidentRay, pNearestShape);
+        final_color += traceShadowRay(shapes, HitData{ Ray{ RayTraceData.hitInfo->reflection.pos, lightDir }, RayTraceData.hitInfo->norm, 0.f, 0.f }, incidentRay, RayTraceData.hitShape);
       }
     }
+
+    for(auto& lightSource : RayTraceData.lightSources) {
+      final_color += lightSource.color * lightSource.halo_factor;
+    }
+
   }
   return final_color;
 }

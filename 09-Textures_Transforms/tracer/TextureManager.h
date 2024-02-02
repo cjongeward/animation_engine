@@ -10,6 +10,7 @@ struct Texture {
 	std::string filename;
 	int rows = 0;
 	int cols = 0;
+	int numPaddingBytes = 0;
 	int* arr = nullptr;
 
 	Texture(std::string t_filename) {
@@ -60,6 +61,7 @@ struct Texture {
 		f.get(c);
 		f.get(d);
 		cols = ((unsigned)d << 24) + ((unsigned)c << 16) + ((unsigned)b << 8) + (unsigned)((unsigned char)a);
+		numPaddingBytes = cols % 4;
 		f.get(a);
 		f.get(b);
 		f.get(c);
@@ -80,6 +82,10 @@ struct Texture {
 				int col = (((int)c3) << 24) + (((int)c2) << 16) + (((int)c1) << 8);
 				arr[i*cols + j] = col;
 			}
+			char dontcare;
+			for (int i = 0; i < numPaddingBytes; ++i) {
+				f.get(dontcare);
+			}
 		}
 		f.close();
 	}
@@ -93,8 +99,13 @@ private:
 		textures.emplace_back("floor.bmp");
 		textures.emplace_back("escher.bmp");
 		textures.emplace_back("escher2.bmp");
-		textures.emplace_back("fireman.bmp");
+		textures.emplace_back("fireman3.bmp");
 		textures.emplace_back("grass.bmp");
+		textures.emplace_back("ada-toon.bmp");
+		textures.emplace_back("bricks.bmp");
+		textures.emplace_back("matterhorn.bmp");
+		textures.emplace_back("rocket.bmp");
+		textures.emplace_back("corrugated_metal.bmp");
 	}
 
 public:

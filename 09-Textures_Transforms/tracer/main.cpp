@@ -13,13 +13,12 @@
 #include <sstream>
 #include <chrono>
 
-void transform(std::vector<std::unique_ptr<Shape>>& shapes) {
-  mat cam_pos = mat::translation(-vec{-8.f, 3.f, -1.f});
-  mat cam_rot = mat::rotation(PI4, PI4/3.f, 0.f);
+void transform(std::unique_ptr<Shape>& shape) {
+  mat cam_pos = mat::translation(-vec{-9.f, 0.f, -1.f});
+//  mat cam_rot = mat::rotation(PI4, PI4/3.f, 0.f);
+  mat cam_rot = mat::rotation(PI4, -PI4/4.f, 0.f);
   mat xform = cam_rot * cam_pos;
-  for(auto& shape : shapes) {
-    shape->transform(xform);
-  }
+  shape->transform(xform);
 }
 
 int main() {
@@ -27,25 +26,32 @@ int main() {
   const vec focal_point{0.f, 0.f, FOCAL_DIST};
   PerspectiveRayGenerator rayGenerator{ screen, focal_point };
   Scene scene;
-  auto shapes = scene.getFrame();
-  transform(shapes);
+  auto rootShape = scene.getRootShape();
+  transform(rootShape);
+  std::vector<std::thread> threads;
   unsigned int* img = new unsigned int[RESX * RESY];
   for (int row = 0; row < RESY; ++row) {
-    for (int col = 0; col < RESX; ++col) {
-      std::vector<Ray> rays = rayGenerator.MakeRay(row, col);
-      // for debugging
-      if (RESY - row - 1 == 595 && col == 400) {
-        int blah = 0;
+    threads.emplace_back([rayGenerator, row, &rootShape, img]() {
+      for (int col = 0; col < RESX; ++col) {
+        std::vector<Ray> rays = rayGenerator.MakeRay(row, col);
+        // for debugging
+        if (RESY - row - 1 == 150 && col == 660) {
+          int blah = 0;
+        }
+        // get average color for all rays in the pixel
+        Color final_color = BLACK;
+        for (auto& ray : rays) {
+          const RayTracer tracer{ ray };
+          final_color += tracer.trace(rootShape);
+        }
+        final_color *= 1.f / rays.size();
+        img[RESX * (RESY - row - 1) + col] = final_color;
       }
-      // get average color for all rays in the pixel
-      Color final_color = BLACK;
-      for (auto& ray : rays) {
-        const RayTracer tracer{ ray };
-        final_color += tracer.trace(shapes);
-      }
-      final_color *= 1.f / rays.size();
-      img[RESX*(RESY - row - 1) + col] = final_color;
-    }
+    });
+  }
+
+  for (auto& t : threads) {
+    t.join();
   }
 
   bool result = intarray2bmp::intarray2bmp("image.bmp", img, RESY, RESX);

@@ -2,6 +2,7 @@
 #define SHAPES_H_
 
 #include <optional>
+#include <vector>
 #include "vec.h"
 #include "SurfaceProperties.h"
 #include "Reflection.h"
@@ -11,26 +12,67 @@ struct Ray {
   vec dir;
   Ray(const vec& t_pos, const vec& t_dir) : pos{ t_pos }, dir{ t_dir } {}
 };
+
+struct LightSourceData {
+  Color color;
+  float halo_factor = 0.f;
+  LightSourceData(Color& t_color, float t_halo_factor) : color{ t_color }, halo_factor{ t_halo_factor } {}
+};
+
 // data packet containing important data from a reflection
-struct ReflectionData {
+struct HitData {
   Ray reflection;
   vec norm;
   float u = 0.f;
   float v = 0.f;
-  ReflectionData(const Ray& t_reflection, const vec& t_norm, float t_u, float t_v) : reflection{ t_reflection }, norm{ t_norm }, u{t_u}, v{t_v}{}
+  HitData(const Ray& t_reflection, const vec& t_norm, float t_u, float t_v) : reflection{ t_reflection }, norm{ t_norm }, u{t_u}, v{t_v}{}
 };
 
+struct RayTraceDataPacket;
 struct Shape {
   vec pos;
   SurfaceProperties properties;
   Shape(const vec& t_pos, const SurfaceProperties& t_properties) : pos{ t_pos }, properties{ t_properties } {}
-  virtual std::optional<ReflectionData> intersects_with(const Ray& ray) const = 0;
+  virtual std::optional<HitData> intersects_with(const Ray& ray) const {};
+  virtual float shortest_distance(const Ray& ray) const { return 0.f; }
   virtual void transform(const mat& xform) = 0;
+  virtual RayTraceDataPacket findNearestHitPoint(const Ray& incidentRay, const Shape* pIgnoreShape);
+  virtual std::vector<const Shape*> getLightSources() const {
+    if (properties.intensity > 0.f) {
+      std::vector<const Shape*> vec({ this });
+      return vec;
+    }
+  }
 };
+
+struct RayTraceDataPacket {
+  std::optional<HitData> hitInfo = std::nullopt;
+  std::vector<LightSourceData> lightSources;
+  Shape* hitShape = nullptr;
+};
+
+struct CompositeShape : public Shape {
+  std::vector<std::unique_ptr<Shape>> shapes;
+  CompositeShape(const vec& t_pos) : Shape{ t_pos,  SurfaceProperties(Color(), 0.f, 0.f, 0, 0.f, 0.f)} {}
+  void transform(const mat& xform) override {
+    for (auto& shape : shapes) {
+      shape->transform(xform);
+    }
+  }
+  RayTraceDataPacket findNearestHitPoint(const Ray& incidentRay, const Shape* pIgnoreShape) override;
+  std::vector<const Shape*> getLightSources() const override {
+    std::vector<const Shape*> vec;
+    for (auto& shape : shapes) {
+      vec.insert()
+    }
+  }
+};
+
 struct Sphere : public Shape {
   float radius;
   Sphere(const vec& t_pos, const SurfaceProperties& t_properties, float t_radius) : Shape{ t_pos, t_properties }, radius{ t_radius } {}
-  std::optional<ReflectionData> intersects_with(const Ray& ray) const override;
+  std::optional<HitData> intersects_with(const Ray& ray) const override;
+  float shortest_distance(const Ray& ray) const override;
   void transform(const mat& xfrom) override {
     pos = xfrom * pos;
   }
@@ -52,7 +94,7 @@ struct Triangle : public Shape {
   {
     norm.normalize();
   }
-  std::optional<ReflectionData> intersects_with(const Ray& ray) const override;
+  std::optional<HitData> intersects_with(const Ray& ray) const override;
   void transform(const mat& xfrom) override {
     pos = xfrom * pos;
     pos2 = xfrom * pos2;
@@ -79,7 +121,7 @@ struct Rect : public Shape {
   { 
     norm.normalize();
   }
-  std::optional<ReflectionData> intersects_with(const Ray& ray) const override;
+  std::optional<HitData> intersects_with(const Ray& ray) const override;
   void transform(const mat& xfrom) override {
     pos = xfrom * pos;
     pos2 = xfrom * pos2;
@@ -118,7 +160,7 @@ struct Box : public Shape {
     {
     }
 
-  std::optional<ReflectionData> intersects_with(const Ray& ray) const override;
+  std::optional<HitData> intersects_with(const Ray& ray) const override;
 
   void transform(const mat& xfrom) override {
     rect0.transform(xfrom);

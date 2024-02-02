@@ -1,8 +1,8 @@
 #ifndef SETTINGS_H_
 #define SETTINGS_H_
 
-constexpr int RESX = 1200;
-constexpr int RESY = 800;
+constexpr int RESX = 1800;
+constexpr int RESY = 1200;
 constexpr float FOCAL_DIST = 2.f;
 constexpr float SCREEN_SIZE_X = 3.f;
 constexpr float SCREEN_SIZE_Y = 2.f;

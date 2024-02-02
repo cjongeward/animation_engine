@@ -5,6 +5,10 @@
 #include "TextureManager.h"
 #include "Color.h"
 
+struct NormalMap {
+
+};
+
 struct SurfaceProperties {
   Color color;
   float diffuse_factor;
@@ -20,7 +24,7 @@ struct SurfaceProperties {
     specular_exp{ t_spec_exp },
     reflect_factor{ t_reflect },
     intensity{t_intensity},
-	textureId{t_textureId}
+	  textureId{t_textureId}
   { }
 };
 constexpr SurfaceProperties MIRRORISH{ GREY, 0.4f, 0.0f, 100, 0.9f, 0.f };
@@ -32,8 +36,12 @@ constexpr SurfaceProperties GRAYISH{ LIGHTGREY, 0.5f, 0.15f, 10, 0.0f, 0.f };
 constexpr SurfaceProperties FLOOR{ LIGHTGREY, 0.5f, 0.15f, 10, 0.0f, 0.f, "floor.bmp" };
 constexpr SurfaceProperties PIC1{ LIGHTGREY, 0.5f, 0.15f, 10, 0.0f, 0.f, "escher.bmp" };
 constexpr SurfaceProperties PIC2{ LIGHTGREY, 0.5f, 0.15f, 10, 0.0f, 0.f, "escher2.bmp" };
-constexpr SurfaceProperties PIC3{ LIGHTGREY, 0.5f, 0.15f, 10, 0.0f, 0.f, "fireman.bmp" };
+constexpr SurfaceProperties PIC3{ LIGHTGREY, 0.5f, 0.15f, 10, 0.0f, 0.f, "fireman3.bmp" };
+constexpr SurfaceProperties MATTERHORN{ WHITE, 0.5f, 0.15f, 10, 0.0f, 0.f, "matterhorn.bmp" };
+constexpr SurfaceProperties ROCKET{ WHITE, 0.5f, 0.15f, 10, 0.0f, 0.f, "rocket.bmp" };
 constexpr SurfaceProperties GRASS{ LIGHTGREY, 0.5f, 0.15f, 10, 0.0f, 0.f, "grass.bmp" };
+constexpr SurfaceProperties BRICKWALL{ WHITE, 0.5f, 0.15f, 10, 0.0f, 0.f, "bricks.bmp"};
+constexpr SurfaceProperties CORRUGATED_METAL{ WHITE, 0.5f, 0.15f, 10, 0.0f, 0.f, "corrugated_metal.bmp"};
 constexpr SurfaceProperties WHITEISH{ REALLYLIGHTGREY, 0.5f, 0.0f, 10, 0.0f, 0.f };
 constexpr SurfaceProperties YELLOWISH{ Color{0.f, 0.6f, 0.3f}, 0.5f, 0.15f, 10, 0.0f, 0.f };
 constexpr SurfaceProperties BLACKISH{ BLACK, 0.5f, 0.15f, 10, 0.0f, 0.f };

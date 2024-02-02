@@ -2,8 +2,56 @@
 #include <functional>
 #include "Shapes.h"
 
+std::optional<LightSourceData> calcLightSourceData(Shape* shape, float min_dist) {
+  constexpr float MAX_HALO_DIST = 2.f;
+  float halo_radius = MAX_HALO_DIST * shape->properties.intensity;
+  if (min_dist >= halo_radius) {
+    return std::nullopt;
+  }
+  float halo_mult_factor = 1.f - (min_dist / halo_radius);
+  return std::make_optional(LightSourceData(shape->properties.color, halo_mult_factor ));
+}
 
-std::optional<ReflectionData> Sphere::intersects_with(const Ray& incident_ray) const {
+RayTraceDataPacket Shape::findNearestHitPoint(const Ray& incidentRay, const Shape* pIgnoreShape) {
+  RayTraceDataPacket RayTraceData;
+  if (this != pIgnoreShape) {
+    auto hit = intersects_with(incidentRay);
+    if (hit.has_value()) {
+      RayTraceData.hitShape = this;
+      RayTraceData.hitInfo = hit;
+      if (auto lightSourceData = calcLightSourceData(this, 0.f); lightSourceData.has_value()) {
+        RayTraceData.lightSources.push_back(*lightSourceData);
+      }
+    }
+    else if (properties.intensity > 0.f) {
+      auto min_dist = shortest_distance(incidentRay);
+      if (auto lightSourceData = calcLightSourceData(this, min_dist); lightSourceData.has_value()) {
+        RayTraceData.lightSources.push_back(*lightSourceData);
+      }
+    }
+  }
+  return RayTraceData;
+}
+
+RayTraceDataPacket CompositeShape::findNearestHitPoint(const Ray& incidentRay, const Shape* pIgnoreShape) {
+  RayTraceDataPacket RayTraceData;
+  for (const auto& shape : shapes) {
+    auto lowDataPacket = shape->findNearestHitPoint(incidentRay, pIgnoreShape);
+    if (lowDataPacket.hitInfo.has_value()) {
+      if (!RayTraceData.hitInfo.has_value() || dist2(lowDataPacket.hitInfo->reflection.pos, incidentRay.pos) < dist2(RayTraceData.hitInfo->reflection.pos, incidentRay.pos)) {
+        RayTraceData.hitShape = lowDataPacket.hitShape;
+        RayTraceData.hitInfo = lowDataPacket.hitInfo;
+      }
+    }
+    for (auto& lightSource : lowDataPacket.lightSources) {
+      RayTraceData.lightSources.push_back(lightSource);
+    }
+  }
+  return RayTraceData;
+
+}
+
+std::optional<HitData> Sphere::intersects_with(const Ray& incident_ray) const {
   auto v_ray2sph_center = pos - incident_ray.pos;
   auto v_r2s_proj_ray = v_ray2sph_center.dot(incident_ray.dir); // projection of ray_origin_to_sphere onto ray
   if (v_r2s_proj_ray < 0.f) {  // if sphere is behind ray origin
@@ -23,11 +71,23 @@ std::optional<ReflectionData> Sphere::intersects_with(const Ray& incident_ray) c
   auto v_norm = p_sphere_surface - pos;
   v_norm.normalize();
   auto v_reflection = reflect(incident_ray.dir, v_norm);
-  return std::make_optional(ReflectionData(Ray(p_sphere_surface, v_reflection), v_norm, 0.f, 0.f));
+  return std::make_optional(HitData(Ray(p_sphere_surface, v_reflection), v_norm, 0.f, 0.f));
+}
+
+float Sphere::shortest_distance(const Ray& incident_ray) const {
+  auto v_ray2sph_center = pos - incident_ray.pos;
+  auto v_r2s_proj_ray = v_ray2sph_center.dot(incident_ray.dir); // projection of ray_origin_to_sphere onto ray
+  if (v_r2s_proj_ray < 0.f) {  // if sphere is behind ray origin
+    return v_ray2sph_center.mag();
+  }
+  auto v_ray2sph_bis = incident_ray.dir * v_r2s_proj_ray; // vector from ray origin to midway through the sphere along the ray
+  auto v_min_dist = v_ray2sph_bis - v_ray2sph_center; // vector from sphere center to closest point on the ray 
+  float dist = v_min_dist.mag();
+  return dist;
 }
 
 template <class FUNC>
-std::optional<ReflectionData> barycentric_intersects(const vec & pos1, const vec& p2mp1, const vec& p3mp1, const vec& norm, const Ray & incident_ray, FUNC func) {
+std::optional<HitData> barycentric_intersects(const vec & pos1, const vec& p2mp1, const vec& p3mp1, const vec& norm, const Ray & incident_ray, FUNC func) {
   // use Cramers rule to solve for barycentric coordinates (alpha and gamma) and t in this equation
   // incident_ray.pos + incident_ray.dir * t = pos1 + alpha * (pos2 - pos1) + gamma * (pos3 - pos1);
   const auto& dir = incident_ray.dir;
@@ -52,22 +112,22 @@ std::optional<ReflectionData> barycentric_intersects(const vec & pos1, const vec
   }
   const auto hitPoint = incident_ray.pos + incident_ray.dir * t;
   auto reflection = reflect(incident_ray.dir, norm);
-  return std::make_optional(ReflectionData(Ray(hitPoint, reflection), norm, beta, gamma));
+  return std::make_optional(HitData(Ray(hitPoint, reflection), norm, beta, gamma));
 }
 
-std::optional<ReflectionData> Triangle::intersects_with(const Ray & incident_ray) const {
+std::optional<HitData> Triangle::intersects_with(const Ray & incident_ray) const {
   return barycentric_intersects(pos, p2mp1, p3mp1, norm, incident_ray, [](float beta, float gamma) {
     return beta >= 0.f && gamma >= 0.f && beta + gamma <= 1.f;
   });
 }
 
-std::optional<ReflectionData> Rect::intersects_with(const Ray & incident_ray) const {
+std::optional<HitData> Rect::intersects_with(const Ray & incident_ray) const {
   return barycentric_intersects(pos, p2mp1, p3mp1, norm, incident_ray, [](float beta, float gamma) {
     return beta >= 0.f && gamma >= 0.f && beta <= 1.f && gamma <= 1.f;
   });
 }
 
-std::optional<ReflectionData> Box::intersects_with(const Ray & incident_ray) const {
+std::optional<HitData> Box::intersects_with(const Ray & incident_ray) const {
   auto r0 = rect0.intersects_with(incident_ray);
   auto r1 = rect1.intersects_with(incident_ray);
   auto r2 = rect2.intersects_with(incident_ray);

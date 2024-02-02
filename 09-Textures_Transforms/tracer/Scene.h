@@ -7,7 +7,7 @@ struct Shape;
 class Scene {
 public:
   // Creates a vector of shapes to be rendered
-  std::vector<std::unique_ptr<Shape>> getFrame();
+  std::unique_ptr<Shape> getRootShape();
 };
 
 #endif
