@@ -29,24 +29,24 @@ std::unique_ptr<Shape> Scene::getRootShape()
   Box fixture13{vec{0.f, 0.f, 0.f}, BLACKISH};
   fixture13.transform(mat::translation(vec{0.f, -0.75f, 0.5f}) * mat::scale(vec{0.1f, 0.1f, 1.f}));
   Sphere light_bulb{ vec{0.f, -1.5f, 1.f}, LIGHT, 0.1f };
- // CompositeShape fixture;
- // fixture.shapes.push_back(std::make_unique<Box>(fixture1));
- // fixture.shapes.push_back(std::make_unique<Box>(fixture12));
- // fixture.shapes.push_back(std::make_unique<Box>(fixture13));
- // fixture.shapes.push_back(std::make_unique<Sphere>(light_bulb));
- // fixture.transform(mat::translation(vec{ -6.f, 4.5f, -20.f }));
- // CompositeShape fixture2;
- // fixture2.shapes.push_back(std::make_unique<Box>(fixture1));
- // fixture2.shapes.push_back(std::make_unique<Box>(fixture12));
- // fixture2.shapes.push_back(std::make_unique<Box>(fixture13));
- // fixture2.shapes.push_back(std::make_unique<Sphere>(light_bulb));
- // fixture2.transform(mat::translation(vec{ 6.f, 4.5f, -20.f }));
- // CompositeShape fixture3;
- // fixture3.shapes.push_back(std::make_unique<Box>(fixture1));
- // fixture3.shapes.push_back(std::make_unique<Box>(fixture12));
- // fixture3.shapes.push_back(std::make_unique<Box>(fixture13));
- // fixture3.shapes.push_back(std::make_unique<Sphere>(light_bulb));
- // fixture3.transform(mat::translation(vec{ 0.f, 4.5f, -20.f }));
+  std::unique_ptr<CompositeShape> fixture = std::make_unique<CompositeShape>(vec{ 0.f, 0.f, 0.f }, 2.2f);
+  fixture->shapes.push_back(std::make_unique<Box>(fixture1));
+  fixture->shapes.push_back(std::make_unique<Box>(fixture12));
+  fixture->shapes.push_back(std::make_unique<Box>(fixture13));
+  fixture->shapes.push_back(std::make_unique<Sphere>(light_bulb));
+  fixture->transform(mat::translation(vec{ -6.f, 4.5f, -20.f }));
+  std::unique_ptr<CompositeShape> fixture2 = std::make_unique<CompositeShape>(vec{ 0.f, 0.f, 0.f }, 2.2f);
+  fixture2->shapes.push_back(std::make_unique<Box>(fixture1));
+  fixture2->shapes.push_back(std::make_unique<Box>(fixture12));
+  fixture2->shapes.push_back(std::make_unique<Box>(fixture13));
+  fixture2->shapes.push_back(std::make_unique<Sphere>(light_bulb));
+  fixture2->transform(mat::translation(vec{ 6.f, 4.5f, -20.f }));
+  std::unique_ptr<CompositeShape> fixture3 = std::make_unique<CompositeShape>(vec{ 0.f, 0.f, 0.f }, 2.2f);
+  fixture3->shapes.push_back(std::make_unique<Box>(fixture1));
+  fixture3->shapes.push_back(std::make_unique<Box>(fixture12));
+  fixture3->shapes.push_back(std::make_unique<Box>(fixture13));
+  fixture3->shapes.push_back(std::make_unique<Sphere>(light_bulb));
+  fixture3->transform(mat::translation(vec{ 0.f, 4.5f, -20.f }));
 
   Sphere sun{ vec{200.f, 80.f, 60.f}, SUN, 0.25f };
 
@@ -108,24 +108,16 @@ std::unique_ptr<Shape> Scene::getRootShape()
   Rect matterhorn{ vec{60.f, -10.f, -25.f}, vec{60.f, 10.f, -25.f}, vec{60.f, -10.f, -45.f}, MATTERHORN };
   Rect rocket{ vec{60.f, -10.f, 80.f}, vec{60.f, 10.f, 80.f}, vec{60.f, -10.f, 50.f}, ROCKET };
 
-  auto bunnyTris = parseMesh("bunny_simple2.off");
-  auto handTris = parseMesh("hand_chair.off");
 
-  std::unique_ptr<CompositeShape> rootShape = std::make_unique<CompositeShape>(vec{ 0.f, 0.f, 0.f });
+  std::unique_ptr<CompositeShape> rootShape = std::make_unique<CompositeShape>(vec{ 0.f, 0.f, 0.f }, 300.f);
   rootShape->shapes.push_back(std::make_unique<Sphere>(sphere));
   rootShape->shapes.push_back(std::make_unique<Sphere>(sphere2));
   rootShape->shapes.push_back(std::make_unique<Sphere>(sphere3));
   rootShape->shapes.push_back(std::make_unique<Sphere>(sphere4));
   rootShape->shapes.push_back(std::make_unique<Sphere>(sphere5));
-//  for (auto& shape : fixture.shapes) {
-//    shapes.push_back(std::move(shape));
-//  }
-//  for (auto& shape : fixture2.shapes) {
-//    shapes.push_back(std::move(shape));
-//  }
-//  for (auto& shape : fixture3.shapes) {
-//    shapes.push_back(std::move(shape));
-//  }
+  rootShape->shapes.push_back(std::move(fixture));
+  rootShape->shapes.push_back(std::move(fixture2));
+  rootShape->shapes.push_back(std::move(fixture3));
   rootShape->shapes.push_back(std::make_unique<Sphere>(sun));
   rootShape->shapes.push_back(std::make_unique<Rect>(pic1));
   rootShape->shapes.push_back(std::make_unique<Rect>(pic2));
@@ -139,7 +131,6 @@ std::unique_ptr<Shape> Scene::getRootShape()
   rootShape->shapes.push_back(std::make_unique<Box>(win1));
   rootShape->shapes.push_back(std::make_unique<Box>(win2));
   rootShape->shapes.push_back(std::make_unique<Box>(plank));
-  //shapes.push_back(std::make_unique<Rect>(grass));
   rootShape->shapes.push_back(std::make_unique<Rect>(floor));
   rootShape->shapes.push_back(std::make_unique<Rect>(wall1));
   rootShape->shapes.push_back(std::make_unique<Rect>(wall2a));
@@ -164,9 +155,22 @@ std::unique_ptr<Shape> Scene::getRootShape()
   rootShape->shapes.push_back(std::make_unique<Box>(beam23));
   rootShape->shapes.push_back(std::make_unique<Box>(beam24));
   rootShape->shapes.push_back(std::make_unique<Rect>(mirror));
-//  for(auto& tri : handTris) {
-//    tri.transform(mat::translation(vec{0.f, 0.f, 0.f}) * mat::scale(vec{1.f, 1.f, 1.f}));
-//    shapes.push_back(std::make_unique<Triangle>(tri));
+
+//  auto bunnyTris = parseMesh("bunny.off");
+//  std::unique_ptr<CompositeShape> bunnyShape = std::make_unique<CompositeShape>(vec{ 0.f, 0.f, 0.f }, 2.5f);
+//  for(auto& tri : bunnyTris) {
+//    bunnyShape->shapes.push_back(std::make_unique<Triangle>(tri));
 //  }
+//  bunnyShape->transform(mat::translation(vec{ 3.f, -2.f, -10.f }) * mat::scale(vec{ 2.f,2.f,2.f }));
+//  rootShape->shapes.push_back(std::move(bunnyShape));
+
+  auto handTris = parseMesh("hand_chair.off");
+  std::unique_ptr<CompositeShape> handShape = std::make_unique<CompositeShape>(vec{ 0.f, 0.f, 0.f }, 2000.f);
+  for(auto& tri : handTris) {
+    handShape->shapes.push_back(std::make_unique<Triangle>(tri));
+  }
+  handShape->transform(mat::translation(vec{ -5.f, -2.f, -7.f }) *  mat::rotation(0.f, 0.f, 0.f) * mat::scale(vec{ 0.002f,0.002f,0.002f }));
+  rootShape->shapes.push_back(std::move(handShape));
+
   return rootShape;
 }

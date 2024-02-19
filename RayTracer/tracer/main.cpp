@@ -35,7 +35,7 @@ int main() {
       for (int col = 0; col < RESX; ++col) {
         std::vector<Ray> rays = rayGenerator.MakeRay(row, col);
         // for debugging
-        if (RESY - row - 1 == 150 && col == 660) {
+        if (RESY - row - 1 == 100 && col == 100) {
           int blah = 0;
         }
         // get average color for all rays in the pixel

@@ -33,28 +33,28 @@ RayTraceDataPacket Shape::findNearestHitPoint(const Ray& incidentRay, const Shap
   return RayTraceData;
 }
 
-RayTraceDataPacket CompositeShape::findNearestHitPoint(const Ray& incidentRay, const Shape* pIgnoreShape) {
-  RayTraceDataPacket RayTraceData;
-  for (const auto& shape : shapes) {
-    auto lowDataPacket = shape->findNearestHitPoint(incidentRay, pIgnoreShape);
-    if (lowDataPacket.hitInfo.has_value()) {
-      if (!RayTraceData.hitInfo.has_value() || dist2(lowDataPacket.hitInfo->reflection.pos, incidentRay.pos) < dist2(RayTraceData.hitInfo->reflection.pos, incidentRay.pos)) {
-        RayTraceData.hitShape = lowDataPacket.hitShape;
-        RayTraceData.hitInfo = lowDataPacket.hitInfo;
-      }
-    }
-    for (auto& lightSource : lowDataPacket.lightSources) {
-      RayTraceData.lightSources.push_back(lightSource);
-    }
-  }
-  return RayTraceData;
-
-}
+//RayTraceDataPacket CompositeShape::findNearestHitPoint(const Ray& incidentRay, const Shape* pIgnoreShape) {
+//  RayTraceDataPacket RayTraceData;
+//  for (const auto& shape : shapes) {
+//    auto lowDataPacket = shape->findNearestHitPoint(incidentRay, pIgnoreShape);
+//    if (lowDataPacket.hitInfo.has_value()) {
+//      if (!RayTraceData.hitInfo.has_value() || dist2(lowDataPacket.hitInfo->reflection.pos, incidentRay.pos) < dist2(RayTraceData.hitInfo->reflection.pos, incidentRay.pos)) {
+//        RayTraceData.hitShape = lowDataPacket.hitShape;
+//        RayTraceData.hitInfo = lowDataPacket.hitInfo;
+//      }
+//    }
+//    for (auto& lightSource : lowDataPacket.lightSources) {
+//      RayTraceData.lightSources.push_back(lightSource);
+//    }
+//  }
+//  return RayTraceData;
+//
+//}
 
 std::optional<HitData> Sphere::intersects_with(const Ray& incident_ray) const {
   auto v_ray2sph_center = pos - incident_ray.pos;
   auto v_r2s_proj_ray = v_ray2sph_center.dot(incident_ray.dir); // projection of ray_origin_to_sphere onto ray
-  if (v_r2s_proj_ray < 0.f) {  // if sphere is behind ray origin
+  if (v_r2s_proj_ray + radius < 0.f) {  // if sphere is behind ray origin
     return std::nullopt;
   }
   auto v_ray2sph_bis = incident_ray.dir * v_r2s_proj_ray; // vector from ray origin to midway through the sphere along the ray

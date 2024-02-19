@@ -33,15 +33,16 @@ struct Shape {
   vec pos;
   SurfaceProperties properties;
   Shape(const vec& t_pos, const SurfaceProperties& t_properties) : pos{ t_pos }, properties{ t_properties } {}
-  virtual std::optional<HitData> intersects_with(const Ray& ray) const {};
+  virtual std::optional<HitData> intersects_with(const Ray& ray) const { return std::nullopt; };
   virtual float shortest_distance(const Ray& ray) const { return 0.f; }
   virtual void transform(const mat& xform) = 0;
   virtual RayTraceDataPacket findNearestHitPoint(const Ray& incidentRay, const Shape* pIgnoreShape);
   virtual std::vector<const Shape*> getLightSources() const {
+    std::vector<const Shape*> lightSources;
     if (properties.intensity > 0.f) {
-      std::vector<const Shape*> vec({ this });
-      return vec;
+      lightSources.push_back(this);
     }
+    return lightSources;
   }
 };
 
@@ -49,23 +50,6 @@ struct RayTraceDataPacket {
   std::optional<HitData> hitInfo = std::nullopt;
   std::vector<LightSourceData> lightSources;
   Shape* hitShape = nullptr;
-};
-
-struct CompositeShape : public Shape {
-  std::vector<std::unique_ptr<Shape>> shapes;
-  CompositeShape(const vec& t_pos) : Shape{ t_pos,  SurfaceProperties(Color(), 0.f, 0.f, 0, 0.f, 0.f)} {}
-  void transform(const mat& xform) override {
-    for (auto& shape : shapes) {
-      shape->transform(xform);
-    }
-  }
-  RayTraceDataPacket findNearestHitPoint(const Ray& incidentRay, const Shape* pIgnoreShape) override;
-  std::vector<const Shape*> getLightSources() const override {
-    std::vector<const Shape*> vec;
-    for (auto& shape : shapes) {
- //     vec.insert()
-    }
-  }
 };
 
 struct Sphere : public Shape {
@@ -76,8 +60,52 @@ struct Sphere : public Shape {
   void transform(const mat& xfrom) override {
     pos = xfrom * pos;
   }
-
 };
+
+
+struct CompositeShape : public Shape {
+  std::unique_ptr<Shape> boundingShape;
+  std::vector<std::unique_ptr<Shape>> shapes;
+  CompositeShape(const vec& t_pos, float t_radius) : Shape{ t_pos,  SurfaceProperties(Color(), 0.f, 0.f, 0, 0.f, 0.f)} {
+    boundingShape = std::make_unique<Sphere>(t_pos, properties, t_radius);
+  }
+  void transform(const mat& xform) override {
+    boundingShape->transform(xform);
+    for (auto& shape : shapes) {
+      shape->transform(xform);
+    }
+  }
+  RayTraceDataPacket findNearestHitPoint(const Ray& incidentRay, const Shape* pIgnoreShape) override {
+    RayTraceDataPacket RayTraceData;
+    if (this != pIgnoreShape) {
+      auto boundingShapeDataPacket = boundingShape->findNearestHitPoint(incidentRay, pIgnoreShape);
+      if (boundingShapeDataPacket.hitInfo.has_value()) {
+        for (const auto& shape : shapes) {
+          auto dataPacket = shape->findNearestHitPoint(incidentRay, pIgnoreShape);
+          if (dataPacket.hitInfo.has_value()) {
+            if (!RayTraceData.hitInfo.has_value() || dist2(dataPacket.hitInfo->reflection.pos, incidentRay.pos) < dist2(RayTraceData.hitInfo->reflection.pos, incidentRay.pos)) {
+              RayTraceData.hitShape = dataPacket.hitShape;
+              RayTraceData.hitInfo = dataPacket.hitInfo;
+            }
+          }
+          for (auto& lightSource : dataPacket.lightSources) {
+            RayTraceData.lightSources.push_back(lightSource);
+          }
+        }
+      }
+    }
+    return RayTraceData;
+  }
+  std::vector<const Shape*> getLightSources() const override {
+    std::vector<const Shape*> vec;
+    for (auto& shape : shapes) {
+      auto lightSources = shape->getLightSources();
+      vec.insert(vec.end(), lightSources.begin(), lightSources.end());
+    }
+    return vec;
+  }
+};
+
 struct Triangle : public Shape {
   vec pos2;
   vec pos3;
