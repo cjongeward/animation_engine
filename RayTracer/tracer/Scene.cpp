@@ -156,21 +156,21 @@ std::unique_ptr<Shape> Scene::getRootShape()
   rootShape->shapes.push_back(std::make_unique<Box>(beam24));
   rootShape->shapes.push_back(std::make_unique<Rect>(mirror));
 
-//  auto bunnyTris = parseMesh("bunny.off");
-//  std::unique_ptr<CompositeShape> bunnyShape = std::make_unique<CompositeShape>(vec{ 0.f, 0.f, 0.f }, 2.5f);
-//  for(auto& tri : bunnyTris) {
-//    bunnyShape->shapes.push_back(std::make_unique<Triangle>(tri));
-//  }
-//  bunnyShape->transform(mat::translation(vec{ 3.f, -2.f, -10.f }) * mat::scale(vec{ 2.f,2.f,2.f }));
-//  rootShape->shapes.push_back(std::move(bunnyShape));
-
-  auto handTris = parseMesh("hand_chair.off");
-  std::unique_ptr<CompositeShape> handShape = std::make_unique<CompositeShape>(vec{ 0.f, 0.f, 0.f }, 2000.f);
-  for(auto& tri : handTris) {
-    handShape->shapes.push_back(std::make_unique<Triangle>(tri));
+  auto bunnyTris = parseMesh("bunny.off");
+  std::unique_ptr<CompositeShape> bunnyShape = std::make_unique<CompositeShape>(vec{ 0.f, 0.f, 0.f }, 2.5f);
+  for(auto& tri : bunnyTris) {
+    bunnyShape->shapes.push_back(std::make_unique<Triangle>(tri));
   }
-  handShape->transform(mat::translation(vec{ -5.f, -2.f, -7.f }) *  mat::rotation(0.f, 0.f, 0.f) * mat::scale(vec{ 0.002f,0.002f,0.002f }));
-  rootShape->shapes.push_back(std::move(handShape));
+  bunnyShape->transform(mat::translation(vec{ 3.f, -2.f, -15.f }) * mat::rotation(0.f, 0.f, -3.f * PI / 4.f) * mat::scale(vec{ 2.f,2.f,2.f }));
+  rootShape->shapes.push_back(std::move(bunnyShape));
+
+//  auto handTris = parseMesh("hand_chair.off");
+//  std::unique_ptr<CompositeShape> handShape = std::make_unique<CompositeShape>(vec{ 0.f, 0.f, 0.f }, 2000.f);
+//  for(auto& tri : handTris) {
+//    handShape->shapes.push_back(std::make_unique<Triangle>(tri));
+//  }
+//  handShape->transform(mat::translation(vec{ -5.f, -2.f, -7.f }) *  mat::rotation(0.f, 0.f, 0.f) * mat::scale(vec{ 0.002f,0.002f,0.002f }));
+//  rootShape->shapes.push_back(std::move(handShape));
 
   return rootShape;
 }
