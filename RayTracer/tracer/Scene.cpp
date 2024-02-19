@@ -161,7 +161,7 @@ std::unique_ptr<Shape> Scene::getRootShape()
   for(auto& tri : bunnyTris) {
     bunnyShape->shapes.push_back(std::make_unique<Triangle>(tri));
   }
-  bunnyShape->transform(mat::translation(vec{ 3.f, -2.f, -15.f }) * mat::rotation(0.f, 0.f, -3.f * PI / 4.f) * mat::scale(vec{ 2.f,2.f,2.f }));
+  bunnyShape->transform(mat::translation(vec{ 3.f, -2.f, -17.f }) * mat::rotation(-3.f * PI4, 0.f, 0.f) * mat::scale(vec{ 2.f,2.f,2.f }));
   rootShape->shapes.push_back(std::move(bunnyShape));
 
 //  auto handTris = parseMesh("hand_chair.off");
